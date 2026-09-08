@@ -1,676 +1,256 @@
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js";
+import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/loaders/GLTFLoader.js";
+import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/controls/OrbitControls.js";
+
 const DATA = [
-  {
-    file: "models/butterfly.glb",
-    name: "Butterfly",
-    scientific: "Danaus plexippus",
-    order: "Lepidoptera",
-    family: "Nymphalidae",
-    range: "Americas / migratory",
-    diet: "Nectar",
-    size: "8.5–10.5 cm",
-    role: "Pollinator",
-    life: "2–6 weeks typical adult",
-    summary: "A pollinator and migratory species whose wing patterns support camouflage, signalling and thermal regulation.",
-    note: "Monarchs are famous for multi-generation migrations across North America.",
-    glyph: "◒",
-    scan: {
-      name: "WING SURFACE",
-      text: "Butterfly wings are covered in microscopic scales. Their structure and pigments create colour, pattern and optical effects.",
-      metaA: "LEPIDOPTERA",
-      metaB: "WING NODE"
-    }
-  },
-  {
-    file: "models/bee.glb",
-    name: "Honey Bee",
-    scientific: "Apis mellifera",
-    order: "Hymenoptera",
-    family: "Apidae",
-    range: "Worldwide",
-    diet: "Nectar + pollen",
-    size: "9–20 mm",
-    role: "Pollinator",
-    life: "Weeks to years by caste",
-    summary: "A social pollinator living in colonies with distinct queen, worker and drone roles.",
-    note: "A worker's daily foraging links a hive to a surprisingly large surrounding landscape.",
-    glyph: "✳",
-    scan: {
-      name: "BODY SCAN",
-      text: "The bee's branched hairs trap pollen. Wing beats, antennae and mouthparts coordinate flight, navigation and feeding.",
-      metaA: "HYMENOPTERA",
-      metaB: "BODY NODE"
-    }
-  },
-  {
-    file: "models/ant.glb",
-    name: "Ant",
-    scientific: "Formica rufa",
-    order: "Hymenoptera",
-    family: "Formicidae",
-    range: "Europe / Asia",
-    diet: "Omnivorous",
-    size: "4–9 mm",
-    role: "Soil engineer",
-    life: "Weeks to years by caste",
-    summary: "A cooperative colony-builder that influences soil, seed movement and food-web dynamics.",
-    note: "Ant colonies function like distributed systems: local chemical signals can create colony-scale behaviour.",
-    glyph: "⋮",
-    scan: {
-      name: "ANTENNA SCAN",
-      text: "Ants read much of their environment through antennae, including chemical trails and tactile cues.",
-      metaA: "FORMICIDAE",
-      metaB: "SENSORY NODE"
-    }
-  },
-  {
-    file: "models/dragonfly.glb",
-    name: "Dragonfly",
-    scientific: "Anax imperator",
-    order: "Odonata",
-    family: "Aeshnidae",
-    range: "Africa / Europe / Asia",
-    diet: "Predatory",
-    size: "6.6–8.4 cm",
-    role: "Aerial predator",
-    life: "Months–years aquatic nymph",
-    summary: "A visual hunter capable of precise aerial interception, powered by independently controllable wings.",
-    note: "Dragonfly nymphs spend much of their lives underwater before emerging as winged adults.",
-    glyph: "⟡",
-    scan: {
-      name: "WING JOINT",
-      text: "Four wings can be controlled with fine precision, enabling hovering, abrupt turns and high-speed pursuit.",
-      metaA: "ODONATA",
-      metaB: "FLIGHT NODE"
-    }
-  },
-  {
-    file: "models/ladybug.glb",
-    name: "Ladybird",
-    scientific: "Coccinella septempunctata",
-    order: "Coleoptera",
-    family: "Coccinellidae",
-    range: "Europe / Asia / introduced",
-    diet: "Aphids + small insects",
-    size: "5–8 mm",
-    role: "Biocontrol predator",
-    life: "About 1 year",
-    summary: "A small beetle that can suppress aphid populations and serves as a classic biological-control ally.",
-    note: "Its bright colouration is a warning signal called aposematism.",
-    glyph: "●",
-    scan: {
-      name: "ELYTRA SCAN",
-      text: "The hard forewings form protective covers over delicate flight wings. Their bright colour can signal chemical defence.",
-      metaA: "COLEOPTERA",
-      metaB: "ELYTRA NODE"
-    }
-  },
-  {
-    file: "models/housefly.glb",
-    name: "Housefly",
-    scientific: "Musca domestica",
-    order: "Diptera",
-    family: "Muscidae",
-    range: "Worldwide",
-    diet: "Liquid / decomposing matter",
-    size: "6–7 mm",
-    role: "Decomposer link",
-    life: "15–30 days typical",
-    summary: "A fast-cycling decomposer and food-web link whose sensory system is tuned for rapid flight and feeding.",
-    note: "A fly's compound eyes provide a broad visual field and excellent motion sensitivity.",
-    glyph: "◇",
-    scan: {
-      name: "EYE SCAN",
-      text: "Large compound eyes sample motion across a wide field of view, helping the fly react quickly while airborne.",
-      metaA: "DIPTERA",
-      metaB: "VISION NODE"
-    }
-  },
-  {
-    file: "models/cockroach.glb",
-    name: "Cockroach",
-    scientific: "Periplaneta americana",
-    order: "Blattodea",
-    family: "Blattidae",
-    range: "Worldwide in warm habitats",
-    diet: "Omnivorous",
-    size: "34–53 mm",
-    role: "Decomposer",
-    life: "Several months",
-    summary: "An adaptable decomposer with sensory hairs, antennae and a body plan built for rapid movement through tight spaces.",
-    note: "Cockroaches contribute to nutrient cycling in many terrestrial ecosystems.",
-    glyph: "◈",
-    scan: {
-      name: "ANTENNA SCAN",
-      text: "Long antennae act as sensitive chemical and tactile sensors, sampling the immediate environment continuously.",
-      metaA: "BLATTODEA",
-      metaB: "SENSORY NODE"
-    }
-  },
-  {
-    file: "models/mosquito_3d_model_free.glb",
-    name: "Mosquito",
-    scientific: "Aedes aegypti",
-    order: "Diptera",
-    family: "Culicidae",
-    range: "Tropical / subtropical",
-    diet: "Plant sugars; female blood meals",
-    size: "3–6 mm",
-    role: "Food-web vector",
-    life: "About 2–4 weeks typical",
-    summary: "A tiny dipteran with specialised sensory organs and mouthparts. Females can transmit pathogens between hosts.",
-    note: "This specimen is intentionally loaded on demand because its source model is substantially larger than the other assets.",
-    glyph: "╳",
-    scan: {
-      name: "PROBOSCIS SCAN",
-      text: "The mosquito's feeding apparatus is a specialised set of mouthparts adapted for piercing and fluid uptake.",
-      metaA: "CULICIDAE",
-      metaB: "FEEDING NODE"
-    }
-  }
+ {key:"butterfly",name:"Butterfly",latin:"Danaus plexippus",order:"Lepidoptera",family:"Nymphalidae",range:"Worldwide",diet:"Nectar",size:"8.5–10.5 cm",role:"Pollinator",life:"2–6 weeks adult",color:0xffa63d,note:"Pollination, food webs and seasonal migration make butterflies valuable ecological indicators.",summary:"A pollinator whose wing scales create visual signalling, camouflage and thermoregulation."},
+ {key:"bee",name:"Honey Bee",latin:"Apis mellifera",order:"Hymenoptera",family:"Apidae",range:"Worldwide",diet:"Nectar + pollen",size:"12–15 mm",role:"Pollinator",life:"~6 weeks worker",color:0xf1b84b,note:"Bees support flowering plant reproduction and form tightly coordinated social colonies.",summary:"A social pollinator with a specialised pollen basket and complex colony communication."},
+ {key:"ant",name:"Ant",latin:"Formica rufa",order:"Hymenoptera",family:"Formicidae",range:"Europe + Asia",diet:"Omnivorous",size:"4–9 mm",role:"Soil engineer",life:"Weeks–years",color:0xb46d45,note:"Ants aerate soil, redistribute nutrients and help shape microhabitats.",summary:"A colony-driven soil engineer with extreme cooperative behaviour and specialised caste roles."},
+ {key:"dragonfly",name:"Dragonfly",latin:"Anax imperator",order:"Odonata",family:"Aeshnidae",range:"Africa + Eurasia",diet:"Predatory insects",size:"66–84 mm",role:"Predator",life:"Weeks–months adult",color:0x54bdc4,note:"Dragonflies are efficient aerial predators and useful signals of freshwater ecosystem health.",summary:"A precision aerial predator with independent wing control and exceptional visual acuity."},
+ {key:"ladybug",name:"Ladybird",latin:"Coccinella septempunctata",order:"Coleoptera",family:"Coccinellidae",range:"Northern Hemisphere",diet:"Aphids",size:"5–8 mm",role:"Biocontrol",life:"1 year",color:0xe14f48,note:"Ladybirds help regulate aphid populations and can protect crops naturally.",summary:"A compact beetle whose warning colours advertise chemical defences to predators."},
+ {key:"housefly",name:"House Fly",latin:"Musca domestica",order:"Diptera",family:"Muscidae",range:"Worldwide",diet:"Liquids / decaying matter",size:"6–7 mm",role:"Decomposer",life:"15–30 days",color:0x9fb7be,note:"Flies recycle organic matter and transfer nutrients through food webs.",summary:"A rapid-lifecycle decomposer with halteres that stabilise flight and compound eyes for motion detection."},
+ {key:"cockroach",name:"Cockroach",latin:"Periplaneta americana",order:"Blattodea",family:"Blattidae",range:"Worldwide",diet:"Omnivorous",size:"34–53 mm",role:"Decomposer",life:"1–2 years",color:0x9a704e,note:"Cockroaches are resilient detritivores that participate in nutrient cycling.",summary:"A resilient detritivore built around a flexible exoskeleton, sensitive antennae and rapid locomotion."},
+ {key:"mosquito",name:"Mosquito",latin:"Aedes aegypti",order:"Diptera",family:"Culicidae",range:"Tropical + subtropical",diet:"Nectar / blood (female)",size:"3–6 mm",role:"Pollinator / vector",life:"~2–4 weeks",color:0x7182b6,note:"Mosquitoes occupy aquatic and terrestrial food webs; some species are important disease vectors.",summary:"A lightweight dipteran with a specialised proboscis and sensory antennae tuned to chemical cues."}
 ];
 
-const $ = (sel) => document.querySelector(sel);
-const els = {
-  canvas: $("#mainCanvas"),
-  status: $("#modelStatus"),
-  loadLabel: $("#loadLabel"),
-  loadPercent: $("#loadPercent"),
-  currentIndex: $("#currentIndex"),
-  prevName: $("#prevName"),
-  nextName: $("#nextName"),
-  prevGlyph: $("#prevGlyph"),
-  nextGlyph: $("#nextGlyph"),
-  specimenName: $("#specimenName"),
-  scientificName: $("#scientificName"),
-  captionKicker: $("#captionKicker"),
-  taxOrder: $("#taxOrder"),
-  taxFamily: $("#taxFamily"),
-  taxRange: $("#taxRange"),
-  taxDiet: $("#taxDiet"),
-  taxSize: $("#taxSize"),
-  taxRole: $("#taxRole"),
-  taxLife: $("#taxLife"),
-  profileSummary: $("#profileSummary"),
-  specimenList: $("#specimenList"),
-  fieldNote: $("#fieldNote"),
-  scanCard: $("#scanCard"),
-  scanName: $("#scanName"),
-  scanText: $("#scanText"),
-  scanMetaA: $("#scanMetaA"),
-  scanMetaB: $("#scanMetaB"),
-  closeScan: $("#closeScan"),
-  anatomyHint: $("#anatomyHint"),
-  profileCard: $("#profileCard"),
-  detailsBtn: $("#detailsBtn"),
-  autoRotateBtn: $("#autoRotateBtn"),
-  resetBtn: $("#resetBtn"),
-  infoDrawer: $("#infoDrawer"),
-  drawerTitle: $("#drawerTitle"),
-  drawerBody: $("#drawerBody"),
-  drawerClose: $("#drawerClose"),
-  transitionFlash: $("#transitionFlash"),
-  clock: $("#clock")
+const MODEL_CANDIDATES = key => [
+ `./models/${key}.glb`,
+ `./models/${key}.gltf`,
+ `./models/${key}.GLB`,
+ `./models/${key.replace("housefly","fly")}.glb`,
+ `./models/${key.replace("ladybug","ladybird")}.glb`,
+ `./models/${key.replace("mosquito","mosquito_3d_model_free")}.glb`
+];
+
+const $ = id => document.getElementById(id);
+const ui = {
+ canvas:$("mainCanvas"), status:$("modelStatus"), loadLabel:$("loadLabel"), loadPercent:$("loadPercent"),
+ name:$("specimenName"), latin:$("scientificName"), kicker:$("captionKicker"), current:$("currentIndex"),
+ order:$("taxOrder"), family:$("taxFamily"), range:$("taxRange"), diet:$("taxDiet"), size:$("taxSize"), role:$("taxRole"), life:$("taxLife"),
+ summary:$("profileSummary"), prevName:$("prevName"), nextName:$("nextName"), prevGlyph:$("prevGlyph"), nextGlyph:$("nextGlyph"),
+ list:$("specimenList"), fieldNote:$("fieldNote"), scan:$("scanCard"), scanName:$("scanName"), scanText:$("scanText"), scanMetaA:$("scanMetaA"), scanMetaB:$("scanMetaB"),
+ drawer:$("infoDrawer"), drawerTitle:$("drawerTitle"), drawerBody:$("drawerBody"), profile:$("profileCard")
 };
 
-let activeIndex = 0;
-const cache = new Map();
-let activeRoot = null;
-let activeMixer = null;
-let activeClock = new THREE.Clock();
-let autoRotate = true;
-let isTransitioning = false;
-let pointerDown = false;
-let pointerStart = new THREE.Vector2();
-let initialQuaternion = new THREE.Quaternion();
+let scene, camera, renderer, controls, loader;
+let specimenGroup = null, placeholderGroup = null;
+let currentIndex = 0, activeModelToken = 0, autoRotate = true;
+const modelCache = new Map();
 
-const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x020914, 0.018);
+function initScene(){
+ scene = new THREE.Scene();
+ camera = new THREE.PerspectiveCamera(38, ui.canvas.clientWidth / ui.canvas.clientHeight, 0.01, 100);
+ camera.position.set(0,0.35,4.3);
+ renderer = new THREE.WebGLRenderer({canvas:ui.canvas,alpha:true,antialias:true,powerPreference:"high-performance"});
+ renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));
+ renderer.setSize(ui.canvas.clientWidth, ui.canvas.clientHeight,false);
+ renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 100);
-camera.position.set(0, 0.5, 7.1);
+ scene.add(new THREE.HemisphereLight(0x8ddcff,0x07111e,2.1));
+ const key = new THREE.DirectionalLight(0x9fdfff,2.6); key.position.set(2,3,4); scene.add(key);
+ const rim = new THREE.PointLight(0x3ca9ff,16,8,2); rim.position.set(-2,1.7,1); scene.add(rim);
+ const warm = new THREE.PointLight(0xffbb72,6,6,2); warm.position.set(1.5,-.8,2); scene.add(warm);
 
-const renderer = new THREE.WebGLRenderer({
-  canvas: els.canvas,
-  antialias: true,
-  alpha: true,
-  powerPreference: "high-performance",
-  preserveDrawingBuffer: false
-});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.7));
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+ controls = new OrbitControls(camera, renderer.domElement);
+ controls.enableDamping = true; controls.dampingFactor=.08; controls.enablePan=false;
+ controls.minDistance=2.2; controls.maxDistance=6; controls.target.set(0,0.05,0);
 
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.07;
-controls.enablePan = false;
-controls.minDistance = 4.2;
-controls.maxDistance = 9.5;
-controls.target.set(0, 0.1, 0);
-controls.enabled = false;
-
-const hemi = new THREE.HemisphereLight(0x93c9ff, 0x01050a, 2.15);
-scene.add(hemi);
-const key = new THREE.DirectionalLight(0xcceaff, 2.25);
-key.position.set(3, 5, 5);
-scene.add(key);
-const rim = new THREE.PointLight(0x2e9dff, 42, 14, 2);
-rim.position.set(-2.5, 2.2, 2.5);
-scene.add(rim);
-const cyan = new THREE.PointLight(0x6df3ff, 28, 10, 2);
-cyan.position.set(2.7, .6, 2.1);
-scene.add(cyan);
-
-const floorGlow = new THREE.Mesh(
-  new THREE.CircleGeometry(2.4, 96),
-  new THREE.MeshBasicMaterial({ color: 0x2f9fff, transparent: true, opacity: .09, depthWrite: false })
-);
-floorGlow.rotation.x = -Math.PI / 2;
-floorGlow.position.y = -1.72;
-scene.add(floorGlow);
-
-const raycaster = new THREE.Raycaster();
-const pointer = new THREE.Vector2();
-const tempBox = new THREE.Box3();
-const tempCenter = new THREE.Vector3();
-const tempSize = new THREE.Vector3();
-
-function resize() {
-  const rect = els.canvas.getBoundingClientRect();
-  renderer.setSize(rect.width, rect.height, false);
-  camera.aspect = Math.max(rect.width / Math.max(rect.height, 1), 0.7);
-  camera.updateProjectionMatrix();
-}
-window.addEventListener("resize", resize, { passive: true });
-resize();
-
-
-function createProxySpecimen() {
-  const group = new THREE.Group();
-  group.userData.proxy = true;
-
-  const glowMat = new THREE.MeshStandardMaterial({
-    color: 0x5ccfff,
-    emissive: 0x126fa5,
-    emissiveIntensity: 2.2,
-    metalness: .15,
-    roughness: .35,
-    transparent: true,
-    opacity: .62,
-    side: THREE.DoubleSide
-  });
-
-  const wingShape = new THREE.Shape();
-  wingShape.moveTo(0, 0);
-  wingShape.bezierCurveTo(.92, .72, 1.42, 1.45, .34, 1.58);
-  wingShape.bezierCurveTo(-.1, 1.2, -.22, .58, 0, 0);
-  const wingGeo = new THREE.ShapeGeometry(wingShape);
-  const wingL = new THREE.Mesh(wingGeo, glowMat);
-  wingL.position.set(-.09, .18, 0);
-  wingL.rotation.z = .32;
-  wingL.rotation.y = -.2;
-  const wingR = wingL.clone();
-  wingR.position.x = .09;
-  wingR.rotation.z = Math.PI - .32;
-  wingR.rotation.y = .2;
-  group.add(wingL, wingR);
-
-  const body = new THREE.Mesh(
-    new THREE.CapsuleGeometry(.12, 1.35, 6, 10),
-    new THREE.MeshStandardMaterial({
-      color: 0x253b51, emissive: 0x0c4e72, emissiveIntensity: 1.2,
-      metalness: .3, roughness: .55
-    })
-  );
-  body.rotation.z = 0;
-  group.add(body);
-
-  const eyeGeo = new THREE.SphereGeometry(.045, 12, 8);
-  const eyeMat = new THREE.MeshBasicMaterial({ color: 0x9ff7ff });
-  const e1 = new THREE.Mesh(eyeGeo, eyeMat), e2 = e1.clone();
-  e1.position.set(-.055,.68,.08); e2.position.set(.055,.68,.08);
-  group.add(e1,e2);
-
-  const antennaMat = new THREE.LineBasicMaterial({ color: 0x75ddff, transparent:true, opacity:.8 });
-  for (const side of [-1, 1]) {
-    const pts = [
-      new THREE.Vector3(side*.05,.83,.03),
-      new THREE.Vector3(side*.28,1.13,.02),
-      new THREE.Vector3(side*.5,1.2,.02)
-    ];
-    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), antennaMat);
-    group.add(line);
-  }
-
-  group.scale.setScalar(1.25);
-  group.position.set(0,.18,0);
-  group.rotation.x = .03;
-  return group;
+ loader = new GLTFLoader();
+ window.addEventListener("resize", resize);
+ resize();
+ animate();
 }
 
-const proxySpecimen = createProxySpecimen();
-scene.add(proxySpecimen);
-
-function modelProgress(label, percent) {
-  els.loadLabel.textContent = label;
-  els.loadPercent.textContent = `${Math.round(percent)}%`;
-  els.status.classList.remove("hidden");
+function resize(){
+ const w = ui.canvas.clientWidth || 800, h = ui.canvas.clientHeight || 600;
+ camera.aspect = w/h; camera.updateProjectionMatrix();
+ renderer.setSize(w,h,false);
 }
 
-function smoothProgress() {
-  return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+function makeMat(color, rough=.45, metal=.18, transparent=false, opacity=1){
+ return new THREE.MeshPhysicalMaterial({color,roughness:rough,metalness:metal,clearcoat:.45,clearcoatRoughness:.25,transparent,opacity});
+}
+function limb(a,b,r,color){
+ const dir = new THREE.Vector3().subVectors(b,a), len=dir.length();
+ const geo = new THREE.CylinderGeometry(r,r*.88,len,8);
+ const m = new THREE.Mesh(geo,makeMat(color,.55,.2));
+ const mid = new THREE.Vector3().addVectors(a,b).multiplyScalar(.5); m.position.copy(mid);
+ m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize()); return m;
+}
+function segment(pos,scale,color){
+ const g = new THREE.Group(); const m = new THREE.Mesh(new THREE.IcosahedronGeometry(1,2),makeMat(color,.38,.2));
+ m.scale.set(...scale); m.position.copy(pos); g.add(m); return g;
+}
+function wingMesh(name,shape,color,opacity=.88){
+ const g=new THREE.Group(); g.name=name;
+ const s=new THREE.Shape(); s.moveTo(0,0); shape.forEach(p=>s.lineTo(p[0],p[1])); s.closePath();
+ const geo=new THREE.ShapeGeometry(s); const mat=new THREE.MeshPhysicalMaterial({color,transparent:true,opacity,side:THREE.DoubleSide,roughness:.28,metalness:.05,emissive:color,emissiveIntensity:.07});
+ const m=new THREE.Mesh(geo,mat); m.rotation.x=Math.PI/2; g.add(m); return g;
+}
+function buildPlaceholder(d){
+ const root=new THREE.Group(); root.name="ProceduralPreview";
+ const bodyColor=d.color, dark=0x1a1c22, eye=0x8cf0ff;
+ root.userData.specimen=d.key;
+ const thorax=segment(new THREE.Vector3(0,0,0),[.48,.72,.4],bodyColor); root.add(thorax);
+ const abdomen=segment(new THREE.Vector3(0,-.77,.02),[.33,.75,.3],dark); root.add(abdomen);
+ const head=new THREE.Mesh(new THREE.SphereGeometry(.3,18,14),makeMat(d.color,.32,.22)); head.position.set(0,.63,.02); root.add(head);
+ const e1=new THREE.Mesh(new THREE.SphereGeometry(.055,12,10),makeMat(eye,.2,.6)); e1.position.set(-.12,.7,.25); const e2=e1.clone(); e2.position.x=.12; root.add(e1,e2);
+
+ for(let i=0;i<3;i++){
+   const side=i-1; root.add(limb(new THREE.Vector3(0,-.12-i*.22,0),new THREE.Vector3(.78*side,-.34-i*.25,.03),.045,d.color));
+   root.add(limb(new THREE.Vector3(0,-.12-i*.22,0),new THREE.Vector3(-.78*side,-.34-i*.25,.03),.045,d.color));
+ }
+ const antenna1=limb(new THREE.Vector3(-.12,.74,.02),new THREE.Vector3(-.38,1.15,.03),.025,d.color);
+ const antenna2=limb(new THREE.Vector3(.12,.74,.02),new THREE.Vector3(.38,1.15,.03),.025,d.color); root.add(antenna1,antenna2);
+
+ if(d.key==="butterfly"||d.key==="dragonfly"){
+   const c=d.key==="butterfly"?0xffa63d:0x64c9d7;
+   const spans=d.key==="butterfly"?[[[0,.1],[-1.3,.95],[-1.7,.3],[-.85,-.18]],[[0,.1],[1.3,.95],[1.7,.3],[.85,-.18]],[[-.05,-.1],[-1.05,-.55],[-1.2,-1.25],[-.35,-.55]],[[.05,-.1],[1.05,-.55],[1.2,-1.25],[.35,-.55]]]:[[[0,.15],[-1.7,.65],[-1.35,.1],[-.2,-.15]],[[0,.15],[1.7,.65],[1.35,.1],[.2,-.15]]];
+   spans.forEach((pts,i)=>{const w=wingMesh(i<2?"wingUpper":"wingLower",pts,c,.82); w.position.y=i<2?.2:-.05; root.add(w);});
+ } else if(d.key==="bee"){
+   for(const x of [-.5,.5]){ const w=new THREE.Mesh(new THREE.SphereGeometry(1,24,12),new THREE.MeshPhysicalMaterial({color:0xdff6ff,transparent:true,opacity:.25,side:THREE.DoubleSide,roughness:.15})); w.scale.set(.65,.06,.28); w.position.set(x*.55,.2,.03); w.rotation.z=x*.25; root.add(w); }
+ } else if(d.key==="ladybug"){
+   const shell=new THREE.Mesh(new THREE.SphereGeometry(.85,32,18),makeMat(0xd84a46,.3,.1)); shell.scale.set(1.1,.55,.55); shell.position.y=.1; root.add(shell);
+   for(const x of [-.45,0,.45]) for(const z of [-.45,.45]){const dot=new THREE.Mesh(new THREE.SphereGeometry(.1,10,8),makeMat(0x16181f,.25,.1)); dot.position.set(x*.8,.25,z*.6); root.add(dot);}
+ } else if(d.key==="mosquito"||d.key==="housefly"||d.key==="cockroach"){
+   const wingsColor=0xbfdfff;
+   for(const x of [-.55,.55]){const w=new THREE.Mesh(new THREE.PlaneGeometry(.95,.5),new THREE.MeshPhysicalMaterial({color:wingsColor,transparent:true,opacity:.16,side:THREE.DoubleSide,roughness:.2})); w.position.set(x*.55,.4,.0); w.rotation.z=x*.35; w.rotation.x=-.2; root.add(w);}
+ }
+ root.rotation.x=.08; return root;
 }
 
-function prepareModel(root) {
-  root.traverse((obj) => {
-    if (obj.isMesh) {
-      obj.castShadow = false;
-      obj.receiveShadow = false;
-      if (obj.material) {
-        const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
-        for (const material of materials) {
-          material.side = THREE.DoubleSide;
-          if ("roughness" in material) material.roughness = Math.min(material.roughness ?? .65, .82);
-          if ("metalness" in material) material.metalness = Math.min(material.metalness ?? .15, .25);
-        }
-      }
-    }
-  });
+async function tryLoadGLB(d, token){
+ for(const path of MODEL_CANDIDATES(d.key)){
+   try{
+     setStatus("LOADING SPECIMEN","0%");
+     const gltf=await new Promise((resolve,reject)=>loader.load(path,resolve,undefined,reject));
+     if(token!==activeModelToken) return null;
+     const g=gltf.scene; g.name=`GLB_${d.key}`; normalizeModel(g);
+     attachAnatomyHooks(g,d);
+     return g;
+   }catch{}
+ }
+ return null;
 }
 
-function frameModel(root) {
-  tempBox.setFromObject(root);
-  tempBox.getCenter(tempCenter);
-  tempBox.getSize(tempSize);
-  const maxDim = Math.max(tempSize.x, tempSize.y, tempSize.z) || 1;
-  const scale = 3.15 / maxDim;
-  root.scale.setScalar(scale);
-  tempBox.setFromObject(root);
-  tempBox.getCenter(tempCenter);
-  root.position.x -= tempCenter.x;
-  root.position.y -= tempCenter.y;
-  root.position.z -= tempCenter.z;
-  root.position.y += 0.05;
-  root.updateMatrixWorld(true);
-  initialQuaternion.copy(root.quaternion);
+function normalizeModel(g){
+ const box=new THREE.Box3().setFromObject(g), size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
+ const maxDim=Math.max(size.x,size.y,size.z)||1; const s=2.0/maxDim;
+ g.scale.setScalar(s); g.position.sub(center.multiplyScalar(s)); g.position.y-=.18;
+ g.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false;o.frustumCulled=true;}});
 }
 
-function cacheInteraction(root, data) {
-  root.userData.specimen = data;
-  root.traverse((obj) => {
-    if (!obj.isMesh) return;
-    obj.userData.scan = inferScan(obj, data);
-  });
+function attachAnatomyHooks(g,d){
+ g.traverse(o=>{
+   if(!o.isMesh) return;
+   const n=(o.name||"").toLowerCase();
+   if(n.includes("wing")||n.includes("antenna")||n.includes("head")||d.key!=="butterfly"){
+     o.userData.scanType = n.includes("wing") ? "WING SURFACE" : n.includes("antenna") ? "SENSORY ANTENNA" : n.includes("head") ? "HEAD + EYES" : "SPECIMEN SURFACE";
+   }
+ }
+ });
 }
 
-function inferScan(obj, data) {
-  const n = (obj.name || "").toLowerCase();
-  if (/wiba|wifr|wing|elytra/.test(n)) return {
-    name: "WING / FOREWING",
-    text: data === DATA[0]
-      ? "Microscopic wing scales create colour, texture and signalling patterns. Clicked wing geometry mapped successfully."
-      : "Wing surfaces are lightweight flight structures. The model node is responding to direct anatomical selection.",
-    metaA: data.order.toUpperCase(),
-    metaB: "WING NODE"
-  };
-  if (/eyes|eye/.test(n)) return { name:"VISION NODE", text:"Compound eyes turn local motion into a wide visual field — useful for flight, escape and foraging.", metaA:data.order.toUpperCase(), metaB:"EYE NODE" };
-  if (/body|thorax|abdomen/.test(n)) return { name:"BODY CORE", text:"The central body houses muscle, digestive and respiratory systems, linking the insect's locomotion and metabolism.", metaA:data.order.toUpperCase(), metaB:"BODY NODE" };
-  return data.scan;
+function setStatus(label,pct){ui.loadLabel.textContent=label; ui.loadPercent.textContent=pct}
+function clearModel(){ if(specimenGroup){scene.remove(specimenGroup);specimenGroup.traverse(o=>{if(o.geometry?.dispose)o.geometry.dispose();});} specimenGroup=null; }
+
+async function showSpecimen(i){
+ currentIndex=(i+DATA.length)%DATA.length; const d=DATA[currentIndex]; activeModelToken++;
+ const token=activeModelToken;
+ updateUI(d);
+ clearModel();
+
+ placeholderGroup=buildPlaceholder(d);
+ placeholderGroup.scale.setScalar(d.key==="butterfly"?1.16:1.05);
+ scene.add(placeholderGroup);
+ setStatus("LIVE PREVIEW","100%");
+ requestAnimationFrame(()=>setStatus("SCANNING ASSET","…"));
+
+ const cached=modelCache.get(d.key);
+ if(cached){
+   specimenGroup=cached.clone(true); scene.add(specimenGroup); placeholderGroup.visible=false; setStatus("3D ASSET READY","100%");
+   return;
+ }
+ const loaded=await tryLoadGLB(d,token);
+ if(token!==activeModelToken) return;
+ if(loaded){
+   modelCache.set(d.key,loaded);
+   specimenGroup=loaded.clone(true); scene.add(specimenGroup); placeholderGroup.visible=false; setStatus("3D ASSET READY","100%");
+ }else{
+   setStatus("LIVE FALLBACK","100%");
+ }
+ preloadNeighbors();
 }
 
-async function loadModel(index, visible = true) {
-  if (cache.has(index)) {
-    const root = cache.get(index);
-    if (visible) showModel(root, DATA[index]);
-    return root;
-  }
-
-  const data = DATA[index];
-  const loader = new GLTFLoader();
-  modelProgress("LOADING SPECIMEN", 2);
-
-  const root = await new Promise((resolve, reject) => {
-    loader.load(
-      data.file,
-      (gltf) => resolve(gltf.scene),
-      (event) => {
-        if (event.lengthComputable) modelProgress("LOADING SPECIMEN", event.loaded / event.total * 100);
-        else modelProgress(index === 7 ? "LARGE SPECIMEN / ON-DEMAND" : "STREAMING GEOMETRY", 72);
-      },
-      reject
-    );
-  });
-
-  prepareModel(root);
-  frameModel(root);
-  cacheInteraction(root, data);
-  cache.set(index, root);
-
-  // Hide until activated.
-  root.visible = false;
-  scene.add(root);
-
-  if (visible) showModel(root, data);
-  return root;
+function preloadNeighbors(){
+ [DATA[(currentIndex+1)%8],DATA[(currentIndex+7)%8]].forEach(async d=>{
+   if(modelCache.has(d.key)) return;
+   const token=activeModelToken;
+   const g=await tryLoadGLB(d,token);
+   if(g) modelCache.set(d.key,g);
+ });
 }
 
-async function showModel(root, data) {
-  if (activeRoot && activeRoot !== root) activeRoot.visible = false;
-  proxySpecimen.visible = false;
-  activeRoot = root;
-  activeRoot.visible = true;
-  activeMixer = null;
-  activeIndex = DATA.indexOf(data);
-  controls.enabled = true;
-  controls.target.set(0, 0.1, 0);
+function updateUI(d){
+ ui.current.textContent=String(currentIndex+1).padStart(2,"0"); ui.name.textContent=d.name; ui.latin.textContent=d.latin;
+ ui.kicker.textContent=`${d.order.toUpperCase()} // ${d.family.toUpperCase()}`;
+ ui.order.textContent=d.order; ui.family.textContent=d.family; ui.range.textContent=d.range;
+ ui.diet.textContent=d.diet; ui.size.textContent=d.size; ui.role.textContent=d.role; ui.life.textContent=d.life; ui.summary.textContent=d.summary;
+ ui.fieldNote.textContent=d.note;
+ const p=DATA[(currentIndex+7)%8], n=DATA[(currentIndex+1)%8]; ui.prevName.textContent=p.name; ui.nextName.textContent=n.name;
+ ui.prevGlyph.textContent=iconFor(p.key); ui.nextGlyph.textContent=iconFor(n.key);
+ [...ui.list.children].forEach((el,idx)=>el.classList.toggle("active",idx===currentIndex));
+}
+function iconFor(key){return ({butterfly:"✦",bee:"◌",ant:"•",dragonfly:"⌁",ladybug:"●",housefly:"◇",cockroach:"◈",mosquito:"╱"})[key]||"✦"}
 
-  // Small breathing motion gives the specimen a living "display case" feel.
-  root.userData.baseY = root.position.y;
-  root.userData.phase = Math.random() * Math.PI * 2;
-
-  renderMeta(data);
-  els.status.classList.add("hidden");
-  await smoothProgress();
+function showScan(label,text,metaA="ANATOMY",metaB="INTERACTIVE NODE"){
+ ui.scanName.textContent=label; ui.scanText.textContent=text; ui.scanMetaA.textContent=metaA; ui.scanMetaB.textContent=metaB; ui.scan.classList.add("open");
+}
+function bindCanvasInteractions(){
+ ui.canvas.addEventListener("pointerup",()=>{
+   if(!specimenGroup || Math.random()>.88) return;
+   const d=DATA[currentIndex];
+   if(d.key==="butterfly") showScan("WING SURFACE","Surface scales create colour through pigment and microscopic structure.");
+   else if(d.key==="bee") showScan("POLLEN BASKET","Hind-leg corbiculae transport pollen back to the colony.","MORPHOLOGY","LOADING NODE");
+   else showScan("SPECIMEN SURFACE",`${d.name} detected. Hover and rotate the model to inspect form and function.`);
+ });
 }
 
-async function selectSpecimen(index, direction = 1) {
-  if (isTransitioning || index === activeIndex) return;
-  isTransitioning = true;
-  els.transitionFlash.classList.remove("on");
-  void els.transitionFlash.offsetWidth;
-  els.transitionFlash.classList.add("on");
-  closeScan();
-
-  try {
-    let root = cache.get(index);
-    if (!root) {
-      // Intentionally lazy-load: keeps first paint fast and avoids an 86 MB upfront mosquito download.
-      root = await loadModel(index, false);
-    }
-    await new Promise(r => setTimeout(r, 35));
-    await showModel(root, DATA[index]);
-  } catch (err) {
-    console.error(err);
-    modelProgress("MODEL LOAD ERROR", 100);
-    els.loadLabel.textContent = "MODEL LOAD ERROR";
-  } finally {
-    isTransitioning = false;
-  }
+function buildList(){
+ DATA.forEach((d,i)=>{
+   const row=document.createElement("button"); row.className="specimen-item"; row.innerHTML=`<span class="specimen-num">${String(i+1).padStart(2,"0")}</span><span><b class="specimen-name">${d.name}</b><em class="specimen-latin">${d.latin}</em></span><span class="specimen-dot">${iconFor(d.key)}</span>`;
+   row.addEventListener("click",()=>showSpecimen(i)); ui.list.appendChild(row);
+ });
 }
 
-function renderMeta(data) {
-  els.currentIndex.textContent = String(activeIndex + 1).padStart(2, "0");
-  els.prevName.textContent = DATA[(activeIndex - 1 + DATA.length) % DATA.length].name;
-  els.prevGlyph.textContent = DATA[(activeIndex - 1 + DATA.length) % DATA.length].glyph;
-  els.nextName.textContent = DATA[(activeIndex + 1) % DATA.length].name;
-  els.nextGlyph.textContent = DATA[(activeIndex + 1) % DATA.length].glyph;
-  els.specimenName.textContent = data.name;
-  els.scientificName.textContent = data.scientific;
-  els.captionKicker.textContent = `${data.order.toUpperCase()} // ${data.family.toUpperCase()}`;
-  els.taxOrder.textContent = data.order;
-  els.taxFamily.textContent = data.family;
-  els.taxRange.textContent = data.range;
-  els.taxDiet.textContent = data.diet;
-  els.taxSize.textContent = data.size;
-  els.taxRole.textContent = data.role;
-  els.taxLife.textContent = data.life;
-  els.profileSummary.textContent = data.summary;
-  els.fieldNote.textContent = data.note;
-
-  [...els.specimenList.children].forEach((btn, i) => btn.classList.toggle("is-active", i === activeIndex));
-  els.anatomyHint.innerHTML = `<span class="pulse"></span>${data === DATA[0] ? "Tap a wing / surface to scan" : "Tap specimen to scan"}`;
+function bindUI(){
+ $("prevBtn").addEventListener("click",()=>showSpecimen(currentIndex-1));
+ $("nextBtn").addEventListener("click",()=>showSpecimen(currentIndex+1));
+ $("resetBtn").addEventListener("click",()=>{camera.position.set(0,.35,4.3);controls.target.set(0,.05,0);controls.update()});
+ $("autoRotateBtn").addEventListener("click",e=>{autoRotate=!autoRotate;e.currentTarget.classList.toggle("on",autoRotate);e.currentTarget.innerHTML=`AUTO ROTATE <span>${autoRotate?"ON":"OFF"}</span>`});
+ $("detailsBtn").addEventListener("click",()=>{ui.profile.classList.toggle("expanded");$("detailsBtn").textContent=ui.profile.classList.contains("expanded")?"COLLAPSE −":"EXPAND +"});
+ $("closeScan").addEventListener("click",()=>ui.scan.classList.remove("open"));
+ $("anatomyHint").addEventListener("click",()=>{const d=DATA[currentIndex];showScan(d.key==="butterfly"?"WING SURFACE":"SPECIMEN ANATOMY",d.key==="butterfly"?"Touch a wing to reveal its structural colour story.":`${d.name} — interact with the model to inspect anatomy and behaviour.`)});
+ $("drawerClose").addEventListener("click",()=>ui.drawer.classList.remove("open"));
+ document.querySelectorAll(".principle").forEach(b=>b.addEventListener("click",()=>{
+   document.querySelectorAll(".principle").forEach(x=>x.classList.remove("active")); b.classList.add("active");
+   const mode=b.dataset.mode;
+   if(mode==="observe") ui.drawer.classList.remove("open");
+   if(mode==="learn"){ui.drawerTitle.textContent="Decode the specimen";ui.drawerBody.innerHTML=`<strong>${DATA[currentIndex].name}</strong><br><br>${DATA[currentIndex].summary}<br><br>Rotate the 3D specimen, expand the biological profile, and tap the anatomy hotspot.`;ui.drawer.classList.add("open")}
+   if(mode==="protect"){ui.drawerTitle.textContent="Tiny life. Big systems.";ui.drawerBody.innerHTML=`<strong>Why insects matter</strong><br><br>${DATA[currentIndex].note}<br><br>Every specimen in this catalogue represents a small component of a much larger ecological network.`;ui.drawer.classList.add("open")}
+ }));
+ window.addEventListener("keydown",e=>{if(e.key==="ArrowLeft")showSpecimen(currentIndex-1);if(e.key==="ArrowRight")showSpecimen(currentIndex+1)});
 }
 
-function renderSpecimenList() {
-  els.specimenList.innerHTML = DATA.map((d, i) => `
-    <button class="specimen-item ${i===activeIndex ? "is-active" : ""}" data-index="${i}" type="button">
-      <span class="specimen-no">${String(i+1).padStart(2,"0")}</span>
-      <div><strong>${d.name}</strong><span>${d.scientific}</span></div>
-    </button>
-  `).join("");
-  els.specimenList.addEventListener("click", (e) => {
-    const btn = e.target.closest(".specimen-item");
-    if (!btn) return;
-    selectSpecimen(Number(btn.dataset.index), Number(btn.dataset.index) > activeIndex ? 1 : -1);
-  });
+function animate(){
+ requestAnimationFrame(animate);
+ if(specimenGroup && autoRotate) specimenGroup.rotation.y += .0045;
+ if(placeholderGroup){placeholderGroup.rotation.y += autoRotate?.0032:0; placeholderGroup.position.y=Math.sin(performance.now()*.0014)*.035;}
+ controls.update(); renderer.render(scene,camera);
 }
 
-function openScan(scan) {
-  els.scanName.textContent = scan.name;
-  els.scanText.textContent = scan.text;
-  els.scanMetaA.textContent = scan.metaA;
-  els.scanMetaB.textContent = scan.metaB;
-  els.scanCard.classList.add("is-visible");
+function clockTick(){const d=new Date();$("clock").textContent=d.toLocaleTimeString([], {hour12:false});}
+function boot(){
+ buildList(); bindUI(); initScene(); bindCanvasInteractions(); showSpecimen(0); clockTick(); setInterval(clockTick,1000);
 }
-function closeScan() { els.scanCard.classList.remove("is-visible"); }
-
-function scanFromPointer(clientX, clientY) {
-  const rect = els.canvas.getBoundingClientRect();
-  pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-  pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
-  raycaster.setFromCamera(pointer, camera);
-  const hits = raycaster.intersectObject(activeRoot, true);
-  return hits[0] || null;
-}
-
-els.canvas.addEventListener("pointerdown", e => {
-  pointerDown = true;
-  pointerStart.set(e.clientX, e.clientY);
-});
-window.addEventListener("pointerup", e => {
-  if (!pointerDown) return;
-  pointerDown = false;
-  const moved = pointerStart.distanceTo(new THREE.Vector2(e.clientX, e.clientY));
-  if (moved < 7 && activeRoot) {
-    const hit = scanFromPointer(e.clientX, e.clientY);
-    if (hit && hit.object) openScan(hit.object.userData.scan || DATA[activeIndex].scan);
-    else openScan(DATA[activeIndex].scan);
-  }
-});
-
-els.anatomyHint.addEventListener("click", () => openScan(DATA[activeIndex].scan));
-els.closeScan.addEventListener("click", closeScan);
-
-els.prevBtn.addEventListener("click", () => selectSpecimen((activeIndex - 1 + DATA.length) % DATA.length, -1));
-els.nextBtn.addEventListener("click", () => selectSpecimen((activeIndex + 1) % DATA.length, 1));
-window.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowLeft") selectSpecimen((activeIndex - 1 + DATA.length) % DATA.length, -1);
-  if (e.key === "ArrowRight") selectSpecimen((activeIndex + 1) % DATA.length, 1);
-  if (e.key === "Escape") { closeScan(); closeDrawer(); }
-});
-
-els.autoRotateBtn.addEventListener("click", () => {
-  autoRotate = !autoRotate;
-  els.autoRotateBtn.classList.toggle("is-on", autoRotate);
-  els.autoRotateBtn.innerHTML = `AUTO ROTATE <span>${autoRotate ? "ON" : "OFF"}</span>`;
-});
-els.resetBtn.addEventListener("click", () => {
-  controls.reset();
-  camera.position.set(0, .5, 7.1);
-});
-
-els.detailsBtn.addEventListener("click", () => {
-  const detail = els.profileCard.querySelector(".profile-detail");
-  const isOpen = detail.classList.toggle("is-open");
-  els.detailsBtn.textContent = isOpen ? "COLLAPSE −" : "EXPAND +";
-});
-
-const principleButtons = document.querySelectorAll(".principle");
-principleButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    principleButtons.forEach(b => b.classList.remove("is-active"));
-    btn.classList.add("is-active");
-    if (btn.dataset.open) openDrawer(btn.dataset.open);
-    else document.getElementById(btn.dataset.scrollTarget)?.scrollIntoView({ behavior: "smooth" });
-  });
-});
-
-function openDrawer(type) {
-  if (type === "biology") {
-    els.drawerTitle.textContent = "Biology in motion";
-    els.drawerBody.innerHTML = `
-      <p>Insects are modular, highly specialised organisms. Their exoskeleton protects the body, while segmented appendages and specialised sensory organs let them occupy niches from flowers and leaf litter to freshwater.</p>
-      <div class="fact-strip">
-        <div><span>BODY PLAN</span><b>Head • thorax • abdomen</b></div>
-        <div><span>RESPIRATION</span><b>Tracheal system</b></div>
-        <div><span>DEVELOPMENT</span><b>Metamorphosis varies by order</b></div>
-      </div>`;
-  } else {
-    els.drawerTitle.textContent = "Why protect insects?";
-    els.drawerBody.innerHTML = `
-      <p>Pollination, decomposition, predation and nutrient cycling make insects core components of functioning ecosystems. A clean field study starts with observation: document diversity, reduce habitat pressure and protect the small processes that scale up into healthy landscapes.</p>
-      <div class="fact-strip">
-        <div><span>OBSERVE</span><b>Record diversity</b></div>
-        <div><span>LEARN</span><b>Understand interactions</b></div>
-        <div><span>PROTECT</span><b>Preserve habitat</b></div>
-      </div>`;
-  }
-  els.infoDrawer.classList.add("is-open");
-}
-function closeDrawer() { els.infoDrawer.classList.remove("is-open"); }
-els.drawerClose.addEventListener("click", closeDrawer);
-
-// Preload only the nearest two neighbours after the first interactive frame.
-// This keeps the initial render responsive while making nearby navigation near-instant.
-function preloadNeighbours() {
-  const first = [(activeIndex + 1) % DATA.length, (activeIndex - 1 + DATA.length) % DATA.length];
-  const runner = window.requestIdleCallback || ((fn) => setTimeout(fn, 700));
-  runner(() => first.forEach(i => loadModel(i, false).catch(() => {})));
-}
-
-function tick() {
-  requestAnimationFrame(tick);
-  const dt = activeClock.getDelta();
-  controls.update();
-
-  if (activeRoot) {
-    if (autoRotate && !pointerDown) activeRoot.rotation.y += dt * 0.26;
-    const phase = (activeRoot.userData.phase ?? 0) + performance.now() * 0.0007;
-    activeRoot.position.y = (activeRoot.userData.baseY ?? 0.05) + Math.sin(phase) * 0.028;
-  }
-
-  renderer.render(scene, camera);
-}
-
-function updateClock() {
-  const now = new Date();
-  els.clock.textContent = now.toLocaleTimeString([], { hour12:false });
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-renderSpecimenList();
-renderMeta(DATA[0]);
-tick();
-
-// First specimen only: fastest asset in the set (~2 MB). This is the key "instant-first-view" optimization.
-// The 86 MB mosquito model is never requested until it is selected.
-loadModel(0, true)
-  .then(() => preloadNeighbours())
-  .catch(err => {
-    console.error(err);
-    els.loadLabel.textContent = "CHECK /MODELS PATH";
-    els.loadPercent.textContent = "—";
-    proxySpecimen.visible = true;
-  });
+boot();
