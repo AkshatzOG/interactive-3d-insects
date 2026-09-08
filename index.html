@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insects World - Genesis Lab</title>
+    
+    <!-- Link to external CSS -->
+    <link rel="stylesheet" href="./styles.css">
+
+    <!-- Import Map for Three.js (Modern ES6 Module Support) -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <p class="loader-text">Initializing Hologram Scanner...</p>
+    </div>
+
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- UI Overlay (70% Design Focus) -->
+    <div id="ui-layer">
+        
+        <!-- Top Left Presentation Text -->
+        <div class="glass header-info" id="presentation-text">
+            <h1>INSECTS WORLD</h1>
+            <h2>Small Creatures • Big Impact</h2>
+            <ul class="feature-list">
+                <li><div class="icon">🔍</div><div><strong>Observe</strong><br>Look closer</div></li>
+                <li><div class="icon">🧠</div><div><strong>Learn</strong><br>Discover their world</div></li>
+                <li><div class="icon">🛡️</div><div><strong>Protect</strong><br>For a sustainable tomorrow</div></li>
+            </ul>
+        </div>
+
+        <!-- Center Navigation (Left/Right Chevrons) -->
+        <div class="center-ui">
+            <div class="side-item left-side">
+                <button class="nav-btn" id="prev-btn">❮</button>
+                <div class="faded-text">
+                    <span id="prev-name">Honey Bee</span><br>
+                    <i id="prev-sci">Apis mellifera</i>
+                </div>
+            </div>
+            
+            <div class="side-item right-side">
+                <button class="nav-btn" id="next-btn">❯</button>
+                <div class="faded-text">
+                    <span id="next-name">Ant</span><br>
+                    <i id="next-sci">Formica rufa</i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Glass Info Card (Appears on Click) -->
+        <div class="glass" id="insect-card">
+            <div class="card-header">LIVE SCAN</div>
+            <h3 id="card-title">Butterfly</h3>
+            <h4 id="card-scientific">Danaus plexippus</h4>
+            <p id="card-desc">A pollinator and migratory species whose wing patterns support camouflage, signalling and thermal regulation.</p>
+            
+            <div class="meta-grid">
+                <div><span>ORDER</span><b id="card-order">Lepidoptera</b></div>
+                <div><span>DIET</span><b id="card-diet">Nectar</b></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Link to external JS -->
+    <script type="module" src="./app.js"></script>
+</body>
+</html>
