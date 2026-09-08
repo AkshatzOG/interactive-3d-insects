@@ -1,83 +1,227 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Insects World - Genesis Lab</title>
-    
-    <!-- Link to external CSS -->
-    <link rel="stylesheet" href="./styles.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#020711" />
+  <meta name="description" content="INSECTA — an interactive 3D insect gallery by Genesis Lab / Void Vipers." />
+  <title>INSECTA — Genesis Lab</title>
 
-    <!-- Import Map for Three.js (Modern ES6 Module Support) -->
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
-                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
-            }
-        }
-    </script>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.min.js"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="./styles.css" />
 </head>
+
 <body>
+  <div class="noise"></div>
+  <div class="scanlines"></div>
 
-    <!-- Loading Screen -->
-    <div id="loader">
-        <div class="spinner"></div>
-        <p class="loader-text">Initializing Hologram Scanner...</p>
+  <header class="topbar">
+    <div class="brand-lockup">
+      <div class="brand-mark">GL</div>
+      <div>
+        <div class="brand-title">GENESIS LAB <span>/</span> VOID VIPERS</div>
+        <div class="brand-subtitle">FIELD STUDY // DIGITAL INSECTA</div>
+      </div>
     </div>
 
-    <!-- 3D Canvas Container -->
-    <div id="canvas-container"></div>
-
-    <!-- UI Overlay (70% Design Focus) -->
-    <div id="ui-layer">
-        
-        <!-- Top Left Presentation Text -->
-        <div class="glass header-info" id="presentation-text">
-            <h1>INSECTS WORLD</h1>
-            <h2>Small Creatures • Big Impact</h2>
-            <ul class="feature-list">
-                <li><div class="icon">🔍</div><div><strong>Observe</strong><br>Look closer</div></li>
-                <li><div class="icon">🧠</div><div><strong>Learn</strong><br>Discover their world</div></li>
-                <li><div class="icon">🛡️</div><div><strong>Protect</strong><br>For a sustainable tomorrow</div></li>
-            </ul>
-        </div>
-
-        <!-- Center Navigation (Left/Right Chevrons) -->
-        <div class="center-ui">
-            <div class="side-item left-side">
-                <button class="nav-btn" id="prev-btn">❮</button>
-                <div class="faded-text">
-                    <span id="prev-name">Honey Bee</span><br>
-                    <i id="prev-sci">Apis mellifera</i>
-                </div>
-            </div>
-            
-            <div class="side-item right-side">
-                <button class="nav-btn" id="next-btn">❯</button>
-                <div class="faded-text">
-                    <span id="next-name">Ant</span><br>
-                    <i id="next-sci">Formica rufa</i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Interactive Glass Info Card (Appears on Click) -->
-        <div class="glass" id="insect-card">
-            <div class="card-header">LIVE SCAN</div>
-            <h3 id="card-title">Butterfly</h3>
-            <h4 id="card-scientific">Danaus plexippus</h4>
-            <p id="card-desc">A pollinator and migratory species whose wing patterns support camouflage, signalling and thermal regulation.</p>
-            
-            <div class="meta-grid">
-                <div><span>ORDER</span><b id="card-order">Lepidoptera</b></div>
-                <div><span>DIET</span><b id="card-diet">Nectar</b></div>
-            </div>
-        </div>
-
+    <div class="system-status">
+      <span class="status-dot"></span>
+      <span>3D SCANNER ONLINE</span>
+      <span class="status-divider"></span>
+      <span id="clock">22:29:00</span>
     </div>
+  </header>
 
-    <!-- Link to external JS -->
-    <script type="module" src="./app.js"></script>
+  <main class="app-shell">
+    <aside class="left-rail glass">
+      <div class="eyebrow">01 / OBSERVE</div>
+      <h1>Small creatures.<br><em>Big impact.</em></h1>
+      <p class="intro-copy">A living catalogue of the world's smallest engineers — rendered in interactive 3D.</p>
+
+      <div class="principles">
+        <button class="principle is-active" data-scroll-target="viewer">
+          <span class="principle-icon">⌖</span>
+          <span><strong>Observe</strong><small>Look closer</small></span>
+        </button>
+        <button class="principle" data-open="biology">
+          <span class="principle-icon">◉</span>
+          <span><strong>Learn</strong><small>Decode the specimen</small></span>
+        </button>
+        <button class="principle" data-open="sustainability">
+          <span class="principle-icon">◌</span>
+          <span><strong>Protect</strong><small>For a sustainable tomorrow</small></span>
+        </button>
+      </div>
+
+      <div class="rail-foot">
+        <div class="mini-meter"><span></span></div>
+        <div class="rail-foot-copy">
+          <span>CURATION</span>
+          <b>08 SPECIMENS</b>
+        </div>
+      </div>
+    </aside>
+
+    <section class="viewer-stage" id="viewer">
+      <div class="stage-grid"></div>
+      <div class="stage-vignette"></div>
+
+      <div class="specimen-index">
+        <span id="currentIndex">01</span>
+        <span class="slash">/</span>
+        <span>08</span>
+      </div>
+
+      <div class="ghost-specimen ghost-left">
+        <div class="ghost-orb"><span id="prevGlyph">◒</span></div>
+        <div class="ghost-text">
+          <span>PREVIOUS</span>
+          <strong id="prevName">Honey Bee</strong>
+        </div>
+      </div>
+
+      <div class="ghost-specimen ghost-right">
+        <div class="ghost-orb"><span id="nextGlyph">◒</span></div>
+        <div class="ghost-text">
+          <span>NEXT</span>
+          <strong id="nextName">Ant</strong>
+        </div>
+      </div>
+
+      <button class="nav-button nav-prev" id="prevBtn" aria-label="Previous insect">
+        <span>←</span>
+      </button>
+      <button class="nav-button nav-next" id="nextBtn" aria-label="Next insect">
+        <span>→</span>
+      </button>
+
+      <div class="model-wrap">
+        <canvas id="mainCanvas"></canvas>
+        <div class="holo-ring ring-a"></div>
+        <div class="holo-ring ring-b"></div>
+        <div class="light-beam"></div>
+
+        <div class="model-status" id="modelStatus">
+          <div class="loader-ring"></div>
+          <div>
+            <span id="loadLabel">INITIALIZING SCANNER</span>
+            <strong id="loadPercent">0%</strong>
+          </div>
+        </div>
+
+        <button class="model-hotspot hotspot-wing" id="anatomyHint" type="button">
+          <span class="pulse"></span>
+          <span>Tap specimen to scan</span>
+        </button>
+      </div>
+
+      <div class="specimen-caption">
+        <div class="caption-kicker" id="captionKicker">LEPIDOPTERA // NYMPHALIDAE</div>
+        <h2 id="specimenName">Butterfly</h2>
+        <div class="latin" id="scientificName">Danaus plexippus</div>
+      </div>
+
+      <div class="drag-hint">DRAG TO ROTATE <span>•</span> SCROLL TO ZOOM</div>
+
+      <div class="profile-card glass" id="profileCard">
+        <div class="profile-top">
+          <span>BIOLOGICAL PROFILE</span>
+          <button id="detailsBtn" type="button">EXPAND +</button>
+        </div>
+        <div class="profile-main">
+          <div>
+            <span class="metric-label">ORDER</span>
+            <strong id="taxOrder">Lepidoptera</strong>
+          </div>
+          <div>
+            <span class="metric-label">FAMILY</span>
+            <strong id="taxFamily">Nymphalidae</strong>
+          </div>
+          <div>
+            <span class="metric-label">ACTIVE RANGE</span>
+            <strong id="taxRange">Worldwide</strong>
+          </div>
+        </div>
+        <div class="profile-detail" id="profileDetail">
+          <p id="profileSummary">A pollinator and migratory species whose wing patterns are built for both camouflage and signalling.</p>
+          <div class="detail-grid">
+            <div><span>DIET</span><b id="taxDiet">Nectar</b></div>
+            <div><span>WINGSPAN</span><b id="taxSize">8.5–10.5 cm</b></div>
+            <div><span>ROLE</span><b id="taxRole">Pollinator</b></div>
+            <div><span>LIFESPAN</span><b id="taxLife">2–6 weeks typical adult</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scan-card glass" id="scanCard">
+        <div class="scan-card-head">
+          <span>LIVE SCAN</span>
+          <button type="button" id="closeScan">×</button>
+        </div>
+        <div class="scan-line"></div>
+        <div class="scan-name" id="scanName">WING SURFACE</div>
+        <p id="scanText">Surface scales create colour through pigment and microscopic structure.</p>
+        <div class="scan-meta">
+          <span id="scanMetaA">ANATOMY</span>
+          <span id="scanMetaB">INTERACTIVE NODE</span>
+        </div>
+      </div>
+
+      <div class="tiny-control">
+        <button id="autoRotateBtn" class="tiny-btn is-on" type="button">AUTO ROTATE <span>ON</span></button>
+        <button id="resetBtn" class="tiny-btn" type="button">RESET VIEW</button>
+      </div>
+    </section>
+
+    <aside class="right-rail glass">
+      <div class="rail-section">
+        <span class="eyebrow">SPECIMENS</span>
+        <div class="specimen-list" id="specimenList"></div>
+      </div>
+
+      <div class="right-callout">
+        <div class="dna-icon">↯</div>
+        <div>
+          <span>FIELD NOTE</span>
+          <p id="fieldNote">Tiny organisms regulate ecosystems, pollinate plants and recycle nutrients.</p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <div class="info-drawer glass" id="infoDrawer">
+    <div class="drawer-top">
+      <div>
+        <span class="eyebrow">VOID VIPERS / RESEARCH NOTE</span>
+        <h3 id="drawerTitle">Biology in motion</h3>
+      </div>
+      <button id="drawerClose" type="button">×</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </div>
+
+  <div class="transition-flash" id="transitionFlash"></div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/controls/OrbitControls.js';
+    window.THREE = THREE;
+    window.GLTFLoader = GLTFLoader;
+    window.OrbitControls = OrbitControls;
+  </script>
+  <script src="./app.js" type="module"></script>
 </body>
 </html>
