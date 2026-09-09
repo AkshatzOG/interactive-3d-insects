@@ -1,0 +1,16 @@
+<!doctype html><html><head><meta charset="utf-8"><title>INSECTA Model Diagnostics</title><style>body{font:14px system-ui;background:#07101a;color:#dff6ff;padding:24px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #23445b;padding:8px;text-align:left}.ok{color:#6ff0b9}.bad{color:#ff7b8a}.muted{color:#7694aa}</style></head><body>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js"
+      }
+    }
+  </script><h1>INSECTA / GLB Diagnostics</h1><p class="muted">This page checks the exact local models with the same Draco decoder used by the main site.</p><table><thead><tr><th>Specimen</th><th>File</th><th>Status</th><th>Details</th></tr></thead><tbody id="out"><tr><td colspan="4" class="muted">Starting diagnostics…</td></tr></tbody></table><script type="module">
+window.addEventListener('error',e=>{const out=document.querySelector('#out'); if(out && out.children.length===1 && out.children[0].children.length===1){out.innerHTML=`<tr><td colspan="4" class="bad">JavaScript bootstrap error: ${e.message}</td></tr>`;}});
+
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js';
+import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/loaders/GLTFLoader.js';
+import {DRACOLoader} from 'https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/loaders/DRACOLoader.js';
+const files=['butterfly','bee','ant','dragonfly','ladybug','housefly','cockroach','mosquito_3d_model_free'];const out=document.querySelector('#out');out.innerHTML='';const draco=new DRACOLoader();draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/libs/draco/');draco.preload();const loader=new GLTFLoader();loader.setDRACOLoader(draco);
+for(const file of files){const tr=document.createElement('tr');tr.innerHTML=`<td>${file}</td><td>models/${file}.glb</td><td class="muted">loading…</td><td>—</td>`;out.appendChild(tr);loader.load(`./models/${file}.glb`,g=>{let meshes=0;g.scene.traverse(o=>{if(o.isMesh)meshes++});tr.children[2].textContent='OK';tr.children[2].className='ok';tr.children[3].textContent=`decoded successfully; ${meshes} mesh nodes`},undefined,e=>{tr.children[2].textContent='FAILED';tr.children[2].className='bad';tr.children[3].textContent=e?.message||String(e);console.error(file,e)})}
+</script></body></html>
