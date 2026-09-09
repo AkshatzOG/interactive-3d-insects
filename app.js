@@ -1,5 +1,6 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js";
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/loaders/GLTFLoader.js";
+import { DRACOLoader } from "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/loaders/DRACOLoader.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/controls/OrbitControls.js";
 
 const DATA = [
@@ -32,7 +33,7 @@ const ui = {
  drawer:$("infoDrawer"), drawerTitle:$("drawerTitle"), drawerBody:$("drawerBody"), profile:$("profileCard")
 };
 
-let scene, camera, renderer, controls, loader;
+let scene, camera, renderer, controls, loader, dracoLoader;
 let specimenGroup = null, placeholderGroup = null;
 let currentIndex = 0, activeModelToken = 0, autoRotate = true;
 const modelCache = new Map();
@@ -56,6 +57,10 @@ function initScene(){
  controls.minDistance=2.2; controls.maxDistance=6; controls.target.set(0,0.05,0);
 
  loader = new GLTFLoader();
+ dracoLoader = new DRACOLoader();
+ dracoLoader.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/libs/draco/");
+ dracoLoader.preload();
+ loader.setDRACOLoader(dracoLoader);
  window.addEventListener("resize", resize);
  resize();
  animate();
@@ -120,17 +125,28 @@ function buildPlaceholder(d){
 }
 
 async function tryLoadGLB(d, token){
- for(const path of MODEL_CANDIDATES(d.key)){
-   try{
-     setStatus("LOADING SPECIMEN","0%");
-     const gltf=await new Promise((resolve,reject)=>loader.load(path,resolve,undefined,reject));
-     if(token!==activeModelToken) return null;
-     const g=gltf.scene; g.name=`GLB_${d.key}`; normalizeModel(g);
-     attachAnatomyHooks(g,d);
-     return g;
-   }catch{}
- }
- return null;
+  const path = `./models/${d.key === "mosquito" ? "mosquito_3d_model_free" : d.key}.glb`;
+  return await new Promise(resolve => {
+    setStatus("DECODING SPECIMEN", "…");
+    loader.load(path, gltf => {
+      if(token !== activeModelToken){ resolve(null); return; }
+      const g=gltf.scene;
+      g.name=`GLB_${d.key}`;
+      normalizeModel(g);
+      attachAnatomyHooks(g,d);
+      console.info(`[INSECTA] Loaded ${d.name}: ${path}`);
+      resolve(g);
+    }, xhr => {
+      if(xhr.total){
+        const pct=Math.round(xhr.loaded/xhr.total*100);
+        setStatus("LOADING SPECIMEN", `${pct}%`);
+      }
+    }, error => {
+      console.error(`[INSECTA] Failed to load ${d.name} from ${path}`, error);
+      setStatus("MODEL LOAD ERROR", "SEE CONSOLE");
+      resolve(null);
+    });
+  });
 }
 
 function normalizeModel(g){
@@ -147,12 +163,15 @@ function attachAnatomyHooks(g,d){
    if(n.includes("wing")||n.includes("antenna")||n.includes("head")||d.key!=="butterfly"){
      o.userData.scanType = n.includes("wing") ? "WING SURFACE" : n.includes("antenna") ? "SENSORY ANTENNA" : n.includes("head") ? "HEAD + EYES" : "SPECIMEN SURFACE";
    }
- }
  });
 }
 
 function setStatus(label,pct){ui.loadLabel.textContent=label; ui.loadPercent.textContent=pct}
-function clearModel(){ if(specimenGroup){scene.remove(specimenGroup);specimenGroup.traverse(o=>{if(o.geometry?.dispose)o.geometry.dispose();});} specimenGroup=null; }
+function clearModel(){
+  if(specimenGroup) scene.remove(specimenGroup);
+  if(placeholderGroup){ scene.remove(placeholderGroup); placeholderGroup=null; }
+  specimenGroup=null;
+}
 
 async function showSpecimen(i){
  currentIndex=(i+DATA.length)%DATA.length; const d=DATA[currentIndex]; activeModelToken++;
@@ -168,14 +187,14 @@ async function showSpecimen(i){
 
  const cached=modelCache.get(d.key);
  if(cached){
-   specimenGroup=cached.clone(true); scene.add(specimenGroup); placeholderGroup.visible=false; setStatus("3D ASSET READY","100%");
+   specimenGroup=cached; scene.add(specimenGroup); placeholderGroup.visible=false; setStatus("3D ASSET READY","100%");
    return;
  }
  const loaded=await tryLoadGLB(d,token);
  if(token!==activeModelToken) return;
  if(loaded){
    modelCache.set(d.key,loaded);
-   specimenGroup=loaded.clone(true); scene.add(specimenGroup); placeholderGroup.visible=false; setStatus("3D ASSET READY","100%");
+   specimenGroup=loaded; scene.add(specimenGroup); placeholderGroup.visible=false; setStatus("3D ASSET READY","100%");
  }else{
    setStatus("LIVE FALLBACK","100%");
  }
@@ -183,12 +202,14 @@ async function showSpecimen(i){
 }
 
 function preloadNeighbors(){
- [DATA[(currentIndex+1)%8],DATA[(currentIndex+7)%8]].forEach(async d=>{
-   if(modelCache.has(d.key)) return;
-   const token=activeModelToken;
-   const g=await tryLoadGLB(d,token);
-   if(g) modelCache.set(d.key,g);
- });
+  [DATA[(currentIndex+1)%8],DATA[(currentIndex+7)%8]].forEach(async d=>{
+    if(modelCache.has(d.key)) return;
+    const path=`./models/${d.key === "mosquito" ? "mosquito_3d_model_free" : d.key}.glb`;
+    loader.load(path, gltf=>{
+      const g=gltf.scene; normalizeModel(g); attachAnatomyHooks(g,d); modelCache.set(d.key,g);
+      console.info(`[INSECTA] Preloaded ${d.name}`);
+    }, undefined, error=>console.warn(`[INSECTA] Preload skipped ${d.name}`,error));
+  });
 }
 
 function updateUI(d){
@@ -207,15 +228,23 @@ function showScan(label,text,metaA="ANATOMY",metaB="INTERACTIVE NODE"){
  ui.scanName.textContent=label; ui.scanText.textContent=text; ui.scanMetaA.textContent=metaA; ui.scanMetaB.textContent=metaB; ui.scan.classList.add("open");
 }
 function bindCanvasInteractions(){
- ui.canvas.addEventListener("pointerup",()=>{
-   if(!specimenGroup || Math.random()>.88) return;
-   const d=DATA[currentIndex];
-   if(d.key==="butterfly") showScan("WING SURFACE","Surface scales create colour through pigment and microscopic structure.");
-   else if(d.key==="bee") showScan("POLLEN BASKET","Hind-leg corbiculae transport pollen back to the colony.","MORPHOLOGY","LOADING NODE");
-   else showScan("SPECIMEN SURFACE",`${d.name} detected. Hover and rotate the model to inspect form and function.`);
- });
+  const raycaster=new THREE.Raycaster();
+  const pointer=new THREE.Vector2();
+  ui.canvas.addEventListener("pointerup",event=>{
+    if(!specimenGroup) return;
+    const rect=ui.canvas.getBoundingClientRect();
+    pointer.x=((event.clientX-rect.left)/rect.width)*2-1;
+    pointer.y=-((event.clientY-rect.top)/rect.height)*2+1;
+    raycaster.setFromCamera(pointer,camera);
+    const hits=raycaster.intersectObject(specimenGroup,true);
+    if(!hits.length) return;
+    const d=DATA[currentIndex];
+    const hit=hits[0].object;
+    const scanType=hit.userData.scanType || (d.key==="butterfly"?"WING SURFACE":"SPECIMEN SURFACE");
+    const text=d.key==="butterfly"?"Wing scales interact with light at microscopic scale, creating the specimen's characteristic colour.":`${d.name} anatomy detected. Rotate the specimen to inspect its structure.`;
+    showScan(scanType,text,"ANATOMY","3D RAYCAST");
+  });
 }
-
 function buildList(){
  DATA.forEach((d,i)=>{
    const row=document.createElement("button"); row.className="specimen-item"; row.innerHTML=`<span class="specimen-num">${String(i+1).padStart(2,"0")}</span><span><b class="specimen-name">${d.name}</b><em class="specimen-latin">${d.latin}</em></span><span class="specimen-dot">${iconFor(d.key)}</span>`;
@@ -251,6 +280,11 @@ function animate(){
 
 function clockTick(){const d=new Date();$("clock").textContent=d.toLocaleTimeString([], {hour12:false});}
 function boot(){
- buildList(); bindUI(); initScene(); bindCanvasInteractions(); showSpecimen(0); clockTick(); setInterval(clockTick,1000);
+  try{
+    buildList(); bindUI(); initScene(); bindCanvasInteractions(); showSpecimen(0); clockTick(); setInterval(clockTick,1000);
+  }catch(error){
+    console.error("[INSECTA] Fatal startup error",error);
+    setStatus("STARTUP ERROR","SEE CONSOLE");
+  }
 }
 boot();
