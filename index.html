@@ -20,6 +20,20 @@
   </script>
 </head>
 <body>
+  <div class="preloader" id="preloader">
+    <div class="preloader-noise"></div>
+    <div class="preloader-core">
+      <div class="preloader-brand"><span class="brand-mark">GL</span><div><b>GENESIS LAB</b><span>/ VOID VIPERS</span></div></div>
+      <div class="preloader-kicker">DIGITAL INSECTA // SPECIMEN ARCHIVE</div>
+      <div class="preloader-title">CALIBRATING<br><em>THE LIVING CATALOGUE.</em></div>
+      <div class="preloader-orbit"><i></i><i></i><i></i><span>GL</span></div>
+      <div class="preloader-stage" id="prefillStage">GENESIS LAB // BOOT</div>
+      <div class="preloader-status"><span id="prefillText">INITIALISING OPTICAL ARRAY</span><strong id="prefillPercent">0%</strong></div>
+      <div class="preloader-bar"><span id="prefillBar"></span></div>
+      <div class="preloader-foot"><span>LOCAL GLB</span><span>DRACO DECODER</span><span>THREE.JS</span><span>TOUCH READY</span></div>
+    </div>
+  </div>
+  <div class="scroll-progress"><span></span></div>
   <div class="bg-lab">
     <div class="ceiling-strip s1"></div><div class="ceiling-strip s2"></div><div class="ceiling-strip s3"></div>
     <div class="wall-panel p1"></div><div class="wall-panel p2"></div><div class="wall-panel p3"></div>
@@ -72,11 +86,11 @@
       <div class="specimen-index"><span id="currentIndex">01</span><span class="slash">/</span><span>08</span></div>
 
       <div class="ghost-specimen ghost-left">
-        <div class="ghost-orb"><span id="prevGlyph">✦</span></div>
+        <div class="ghost-orb"><canvas id="ghostLeftCanvas"></canvas></div>
         <div class="ghost-text"><span>PREVIOUS</span><strong id="prevName">Honey Bee</strong></div>
       </div>
       <div class="ghost-specimen ghost-right">
-        <div class="ghost-orb"><span id="nextGlyph">✦</span></div>
+        <div class="ghost-orb"><canvas id="ghostRightCanvas"></canvas></div>
         <div class="ghost-text"><span>NEXT</span><strong id="nextName">Ant</strong></div>
       </div>
 
@@ -92,12 +106,16 @@
         <div class="model-wrap">
           <canvas id="mainCanvas"></canvas>
           <div class="model-aura"></div>
-          <div class="model-status" id="modelStatus">
-            <div class="loader-ring"></div>
-            <div><span id="loadLabel">LIVE PREVIEW</span><strong id="loadPercent">100%</strong></div>
-          </div>
-          <button class="model-hotspot" id="anatomyHint" type="button"><span class="pulse"></span><span>Tap specimen to scan</span></button>
+          <div class="scan-sweep"></div>
+          <button class="model-hotspot" id="anatomyHint" type="button"><span class="pulse"></span><span>Touch specimen to scan anatomy</span></button>
         </div>
+      </div>
+
+      <div class="anatomy-strip glass" aria-label="Anatomy scan nodes">
+        <span class="anatomy-label">ANATOMY NODES</span>
+        <button class="anatomy-chip" type="button">HEAD + ANTENNAE</button>
+        <button class="anatomy-chip" type="button">WING SURFACE</button>
+        <button class="anatomy-chip" type="button">CORE BODY</button>
       </div>
 
       <div class="specimen-caption">
@@ -159,6 +177,13 @@
     <div class="drawer-body" id="drawerBody"></div>
   </div>
 
+  <div class="scroll-observer" aria-hidden="true">
+    <div class="observer-line"></div>
+    <span class="observer-kicker">SCROLL OBSERVATION // <b id="scrollStage">01</b> / 03</span>
+    <strong id="scrollTitle">SPECIMEN IN FOCUS</strong>
+    <span id="scrollSub">Scroll to enter the deeper research layer.</span>
+  </div>
+  <div class="scroll-track" aria-hidden="true"></div>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
