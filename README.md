@@ -1,59 +1,33 @@
-# INSECTA — Genesis Lab / Void Vipers
+# INSECTA — Genesis Lab / Void Vipers — V4
 
-Interactive frontend-only 3D insect gallery built around the supplied GLB models.
+Static, single-page Three.js insect field-study experience.
 
-## What is included
-
-- `index.html` — static entry point
-- `styles.css` — glassmorphism / hologram visual system
-- `app.js` — Three.js scene, model loading, interactions and UI state
-- `models/*.glb` — the 8 supplied insect models
+## What's new in V4
+- Full-screen preload / buffer screen with real GLB loading progress.
+- Draco-compressed local GLBs decoded through `DRACOLoader`.
+- Three.js import map for CDN example modules.
+- Swipe left/right to change specimens.
+- Mouse wheel zoom + pinch zoom on touch devices.
+- Orbit camera constrained vertically and by zoom distance to protect the top/bottom composition.
+- Real local previous/next specimen renders in small, blurred ghost viewports.
+- Three.js animation clips enabled for models that ship with animations (bee, butterfly, cockroach).
+- Interactive anatomy scanning: touch/click the 3D insect or use the three anatomy-node buttons to reveal 3 distinct body-part explanations for every specimen.
+- Lower holographic illumination, scan sweep, ambient aura and shadow-capable Three.js lighting.
+- Scroll-driven parallax/progress treatment while keeping one single-page layout.
+- Responsive desktop/tablet/mobile layout and reduced-motion support.
 
 ## Run locally
+Use VS Code Live Server or any static HTTP server. Do not open `index.html` directly from `file://` because ES modules and local GLBs need HTTP.
 
-Serve the folder through any local static server:
+Open:
+- `index.html` — main experience
+- `model-test.html` — GLB/Draco diagnostics
 
-```bash
-cd insects_website
-python -m http.server 5500
-```
+## Render / static hosting
+- Build command: none
+- Publish directory: project root
+- Start command for static hosting: `npx serve .` (or the host's static-site option)
+- Internet access is required for the Three.js CDN modules, Google Fonts and Draco decoder CDN. The insect GLBs and laboratory background are local.
 
-Then open:
-
-`http://localhost:5500`
-
-You can also use the VS Code Live Server extension.
-
-## Deployment
-
-This is a static site. Upload the whole folder as-is to a static host such as GitHub Pages, Netlify, Vercel static hosting, Cloudflare Pages, or your team's preferred deployment target.
-
-No backend is required.
-
-## Performance decision
-
-The first specimen is `butterfly.glb` (~2.2 MB), so the page requests only that model at startup. The remaining specimens are lazy-loaded and cached as the user navigates.
-
-The supplied mosquito asset is ~86.6 MB, so it is **not** downloaded during first paint. This is deliberate: loading all eight GLBs simultaneously would make the initial experience slow regardless of UI optimisation.
-
-After the first interactive frame, the app schedules the previous and next specimens for background preload. This means normal adjacent navigation becomes effectively instant after the initial screen is visible.
-
-## Interaction model
-
-- Drag / orbit: rotate the active specimen
-- Scroll: zoom
-- Click a model or the scan pill: open a live anatomy / specimen detail card
-- Left / right arrows or keyboard arrows: change specimen
-- `EXPAND +`: reveal biological details
-- `AUTO ROTATE`: toggle presentation rotation
-- `RESET VIEW`: restore camera framing
-
-## Notes for the deployment team
-
-Keep the `models` directory beside `index.html`. Do not flatten or rename the GLB files unless the paths in `app.js` are updated too.
-
-Three.js is loaded from jsDelivr. If the deployment environment requires fully offline / air-gapped assets, pin and vendor the exact Three.js files into a local `vendor/` directory and change the imports in `index.html`.
-
-## Recommended next iteration
-
-The biggest remaining performance win is optimising `mosquito_3d_model_free.glb` with geometry simplification and/or Draco/Meshopt compression. The current lazy-loader prevents that large asset from affecting the first render.
+## SRS alignment
+The supplied SRS describes a responsive static client-side website, modern-browser support, visual hover feedback, high contrast/readability, optimized media rendering, maintainable modular HTML/CSS/JS, and no server/database dependency. This implementation stays frontend-only and adds the requested interactive 3D catalogue behavior on top of that static architecture.
