@@ -7,10 +7,7 @@
   <link rel="preload" as="image" href="./assets/lab-background.png">
   <meta name="description" content="INSECTA — Genesis Lab / Void Vipers interactive 3D insect field study.">
   <title>INSECTA — Genesis Lab / Void Vipers</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./styles.css">
   <script type="importmap">
     {
       "imports": {
@@ -33,7 +30,7 @@
       <div class="preloader-foot"><span>LOCAL GLB</span><span>DRACO DECODER</span><span>THREE.JS</span><span>TOUCH READY</span></div>
     </div>
   </div>
-  <div class="scroll-progress"><span></span></div>
+  
   <div class="bg-lab">
     <div class="ceiling-strip s1"></div><div class="ceiling-strip s2"></div><div class="ceiling-strip s3"></div>
     <div class="wall-panel p1"></div><div class="wall-panel p2"></div><div class="wall-panel p3"></div>
@@ -142,6 +139,7 @@
         </div>
       </div>
 
+      
       <div class="scan-card glass" id="scanCard">
         <div class="scan-card-head"><span>LIVE SCAN</span><button id="closeScan">×</button></div>
         <div class="scan-line"></div>
@@ -154,12 +152,13 @@
         <button id="autoRotateBtn" class="tiny-btn on">AUTO ROTATE <span>ON</span></button>
         <button id="resetBtn" class="tiny-btn">RESET VIEW</button>
       </div>
-      <div class="drag-hint">DRAG TO ROTATE <span>•</span> SCROLL TO ZOOM</div>
+      <div class="drag-hint">DRAG TO ROTATE <span>•</span> PINCH / CTRL + WHEEL = ZOOM <span>•</span> SCROLL = RESEARCH</div>
     </section>
 
     <aside class="right-rail glass">
       <div class="rail-section">
-        <span class="eyebrow">SPECIMENS</span>
+        <div class="catalogue-head"><span class="eyebrow">SPECIMENS</span><strong>08</strong></div>
+        <div class="catalogue-count">SPECIMEN ARCHIVE <b>08 INSECTS</b></div>
         <div class="specimen-list" id="specimenList"></div>
       </div>
       <div class="right-callout">
@@ -177,13 +176,27 @@
     <div class="drawer-body" id="drawerBody"></div>
   </div>
 
-  <div class="scroll-observer" aria-hidden="true">
+  <div class="scroll-observer research-observer" aria-live="polite">
     <div class="observer-line"></div>
     <span class="observer-kicker">SCROLL OBSERVATION // <b id="scrollStage">01</b> / 03</span>
     <strong id="scrollTitle">SPECIMEN IN FOCUS</strong>
     <span id="scrollSub">Scroll to enter the deeper research layer.</span>
   </div>
-  <div class="scroll-track" aria-hidden="true"></div>
-  <script type="module" src="./app.js"></script>
+  
+  <script>
+  // UI watchdog: a slow/blocked 3D dependency must never leave a blank loading screen.
+  window.setTimeout(() => {
+    if (!document.body.classList.contains('ready')) {
+      document.body.classList.add('boot-timeout');
+      const text = document.getElementById('prefillText');
+      const stage = document.getElementById('prefillStage');
+      if (text) text.textContent = '3D RETRYING — INTERFACE ONLINE';
+      if (stage) stage.textContent = 'MOBILE SAFE MODE // UI READY';
+      const pre = document.getElementById('preloader');
+      if (pre) pre.classList.add('watchdog-open');
+    }
+  }, 8500);
+</script>
+<script type="module" src="./app.js"></script>
 </body>
 </html>
