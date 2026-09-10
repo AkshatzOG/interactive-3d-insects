@@ -53,7 +53,12 @@ let specimenGroup=null, placeholderGroup=null;
 let currentIndex=0, activeModelToken=0, autoRotate=true, booted=false;
 let mixer=null, mixerActions=[];
 let ghostViewers=[];
+let researchPhase=0;
+let rendererFailed=false;
 let wingAnimTargets=[];
+let targetCameraZ=4.45,targetCameraY=.28,targetTargetY=.03;
+let cameraTween=0;
+let researchWheelLock=0;
 const modelCache=new Map(), ghostCache=new Map();
 const anatomyNodes=[];
 const clock=new THREE.Clock();
@@ -62,35 +67,45 @@ function modelPath(d){return `./models/${d.key === 'mosquito' ? 'mosquito_3d_mod
 
 function initScene(){
  scene=new THREE.Scene();
- camera=new THREE.PerspectiveCamera(37,ui.canvas.clientWidth/ui.canvas.clientHeight,.01,100);
+ const w=ui.canvas.clientWidth||800,h=ui.canvas.clientHeight||600;
+ camera=new THREE.PerspectiveCamera(37,w/h,.01,100);
  camera.position.set(0,.28,4.45);
- renderer=new THREE.WebGLRenderer({canvas:ui.canvas,alpha:true,antialias:true,powerPreference:'high-performance'});
- renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));
- renderer.setSize(ui.canvas.clientWidth,ui.canvas.clientHeight,false);
+ try{
+   renderer=new THREE.WebGLRenderer({canvas:ui.canvas,alpha:true,antialias:true,powerPreference:'default',preserveDrawingBuffer:false});
+ }catch(err){
+   rendererFailed=true;
+   console.error('[INSECTA] WebGL renderer unavailable',err);
+   throw new Error('WEBGL_UNAVAILABLE');
+ }
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.35));
+ renderer.setSize(w,h,false);
  renderer.outputColorSpace=THREE.SRGBColorSpace;
  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-
- scene.add(new THREE.HemisphereLight(0x9cddff,0x06101c,2.0));
- const key=new THREE.DirectionalLight(0xb8e8ff,3.0); key.position.set(2.2,3.5,4); key.castShadow=true; key.shadow.mapSize.set(1024,1024); scene.add(key);
- const rim=new THREE.PointLight(0x38bfff,18,8,2); rim.position.set(-2.2,1.6,1.5); scene.add(rim);
- const fill=new THREE.PointLight(0x5c8cff,8,7,2); fill.position.set(2,-.6,2.5); scene.add(fill);
- const floor=new THREE.Mesh(new THREE.CircleGeometry(1.55,64),new THREE.MeshBasicMaterial({color:0x59dfff,transparent:true,opacity:.035,side:THREE.DoubleSide})); floor.rotation.x=-Math.PI/2; floor.position.y=-1.02; floor.scale.set(1.7,.65,1); scene.add(floor);
-
+ renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();rendererFailed=true;document.body.dataset.modelState='webgl-lost';});
+ renderer.domElement.addEventListener('webglcontextrestored',()=>{rendererFailed=false;});
+ renderer.toneMapping=THREE.ACESFilmicToneMapping;
+ renderer.toneMappingExposure=1.42;
+ scene.add(new THREE.HemisphereLight(0xc9edff,0x07111c,2.35));
+ const key=new THREE.DirectionalLight(0xe8f7ff,4.4); key.position.set(2.6,4.2,4.5); key.castShadow=true; key.shadow.mapSize.set(1024,1024); key.shadow.camera.near=.1; key.shadow.camera.far=12; scene.add(key);
+ const fill=new THREE.PointLight(0x72cfff,7.5,7,2); fill.position.set(-2.8,1.5,2.5); scene.add(fill);
+ const warm=new THREE.PointLight(0xffd7a4,2.4,6,2); warm.position.set(2.8,.9,1.8); scene.add(warm);
+ const rim=new THREE.PointLight(0x2bbcff,5.5,8,2); rim.position.set(0,2.4,-2.8); scene.add(rim);
+ const floor=new THREE.Mesh(new THREE.CircleGeometry(1.55,64),new THREE.MeshBasicMaterial({color:0x59dfff,transparent:true,opacity:.025,side:THREE.DoubleSide})); floor.rotation.x=-Math.PI/2; floor.position.y=-1.02; floor.scale.set(1.7,.65,1); scene.add(floor);
  controls=new OrbitControls(camera,renderer.domElement);
  controls.enableDamping=true; controls.dampingFactor=.08; controls.enablePan=false; controls.enableZoom=true;
- controls.minDistance=2.35; controls.maxDistance=5.6;
- controls.minPolarAngle=.88; controls.maxPolarAngle=2.18;
- controls.target.set(0,.03,0); controls.rotateSpeed=.55; controls.zoomSpeed=.72;
+ controls.minDistance=2.25; controls.maxDistance=5.25;
+ controls.minPolarAngle=.92; controls.maxPolarAngle=2.12;
+ controls.target.set(0,.03,0); controls.rotateSpeed=.52; controls.zoomSpeed=.72;
  controls.touches={ONE:THREE.TOUCH.ROTATE,TWO:THREE.TOUCH.DOLLY_PAN};
-
  loader=new GLTFLoader();
  dracoLoader=new DRACOLoader();
  dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/libs/draco/');
  dracoLoader.preload(); loader.setDRACOLoader(dracoLoader);
- window.addEventListener('resize',resize);
+ window.addEventListener('resize',resize,{passive:true});
  resize();
 }
-function resize(){const w=ui.canvas.clientWidth||800,h=ui.canvas.clientHeight||600;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);ghostViewers.forEach(g=>g.resize());}
+
+function resize(){if(!camera||!renderer)return;const w=Math.max(1,ui.canvas.clientWidth||800),h=Math.max(1,ui.canvas.clientHeight||600);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);ghostViewers.forEach(g=>g.resize());}
 
 function normalizeModel(g){
  const box=new THREE.Box3().setFromObject(g), size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
@@ -113,32 +128,40 @@ function setupAnimation(g,d){
    const clip=g.animations.find(a=>a.name===preferred)||g.animations[0];
    const action=mixer.clipAction(clip); action.reset().setEffectiveWeight(1).play(); mixerActions=[action];
  }
- // Some supplied models have no skeletal wing animation. Where the wings are
- // separate mesh nodes, add a restrained procedural flap around their local origin.
- if(['dragonfly','housefly'].includes(d.key)){
-   const candidates=[];
-   g.traverse(o=>{if(o.isMesh){const n=(o.name||'').toLowerCase(); const bb=o.geometry?.boundingBox; if(!bb)o.geometry?.computeBoundingBox?.(); const b=o.geometry?.boundingBox; if(!b)return; const size=new THREE.Vector3(); b.getSize(size);
-     const thin=Math.min(size.x,size.y,size.z); const broad=Math.max(size.x,size.y,size.z);
-     const likelyWing = d.key==='housefly' ? (n.includes('0d_0')||n.includes('wing')) : (thin < broad*.12 && broad > .5);
-     if(likelyWing)candidates.push(o);
-   }});
-   candidates.slice(0,4).forEach((o,i)=>wingAnimTargets.push({object:o,base:o.rotation.clone(),phase:i*Math.PI/2,amp:d.key==='dragonfly'?.16:.12}));
+ // Asset-aware procedural wing motion. The supplied Dragonfly and House Fly do
+ // not contain animation clips, but their wing pieces are separate scene nodes.
+ const addTarget=(o,i,amp=.11)=>{if(!o||wingAnimTargets.some(x=>x.object===o))return;wingAnimTargets.push({object:o,base:o.rotation.clone(),phase:i*Math.PI/2,amp});};
+ if(d.key==='dragonfly'){
+   g.traverse(o=>{const n=(o.name||'').toLowerCase();if(/^plane\.00[1-4]_/.test(n))addTarget(o,wingAnimTargets.length,.11);});
+ }
+ if(d.key==='housefly'){
+   g.traverse(o=>{const n=(o.name||'').toLowerCase();if(n.includes('0d_0')||n.includes('0h_0'))addTarget(o,wingAnimTargets.length,.075);});
  }
 }
+
 function prepareModel(g,d){
  normalizeModel(g);attachAnatomyHooks(g,d);
  if(d.key==='bee'){
-   // The supplied bee GLB uses a legacy specular/glossiness material with a
-   // monochrome WebP diffuse map. Preserve its texture detail but colorize it
-   // into a readable honey-bee palette instead of letting the scene wash it out.
+   // Force the supplied colour/albedo map onto a modern PBR material. The
+   // embedded GLB texture is coloured; this avoids renderer/material variants
+   // that can make it appear grey on some mobile GPUs.
    g.traverse(o=>{
      if(!o.isMesh)return;
-     const src=o.material;
-     const mats=Array.isArray(src)?src:[src];
-     mats.forEach(m=>{
-       if(m && !m.map){m.color.set(0xD9A62A);m.roughness=.5;m.metalness=.04;}
-       else if(m){m.color.set(0xD7A126);m.roughness=.5;m.metalness=.02;}
+     const mats=Array.isArray(o.material)?o.material:[o.material];
+     o.material=mats.map(m=>{
+       if(!m)return m;
+       const map=m.map||null, normalMap=m.normalMap||null, aoMap=m.aoMap||null;
+       if(!map)return m;
+       map.colorSpace=THREE.SRGBColorSpace; map.needsUpdate=true;
+       const nm=new THREE.MeshStandardMaterial({
+         map, normalMap, aoMap, color:0xffffff, roughness:.46, metalness:0,
+         transparent:m.transparent, opacity:m.opacity, side:m.side,
+         alphaMap:m.alphaMap||null, alphaTest:m.alphaTest||0
+       });
+       nm.name=(m.name||'BeeMaterial')+' // PBR';
+       return nm;
      });
+     o.material.needsUpdate=true;
    });
  }
 }
@@ -210,25 +233,78 @@ function showScan(part,text,meta='ANATOMY NODE'){ui.scanName.textContent=part;ui
 function scanAnatomy(index){const d=DATA[currentIndex],p=d.anatomy[index%3];showScan(p[0],p[1],p[2]);pulseAnatomy(index);}
 function pulseAnatomy(index){anatomyNodes.forEach((n,i)=>{n.visible=i===index;});setTimeout(()=>anatomyNodes.forEach(n=>n.visible=false),1800);}
 
-function classifyHit(hit,point){const d=DATA[currentIndex];const n=(hit.name||'').toLowerCase();if(n.includes('wing')||n.includes('buttwi'))return 1;if(n.includes('antenna')||n.includes('head')||n.includes('eye')||n.includes('mandib'))return 0;if(n.includes('abdomen')||n.includes('tail')||n.includes('body'))return 2;const box=new THREE.Box3().setFromObject(specimenGroup),y=(point.y-box.min.y)/(box.max.y-box.min.y||1);if(y>.67)return 0;if(y<.34)return 2;return 1;}
+function classifyHit(hit,point){
+ const d=DATA[currentIndex];
+ const n=(hit.name||'').toLowerCase();
+ if(n.includes('wing')||n.includes('buttwi'))return 1;
+ if(n.includes('antenna')||n.includes('head')||n.includes('eye')||n.includes('mandib'))return 0;
+ if(n.includes('abdomen')||n.includes('tail')||n.includes('body'))return 2;
+ const local=specimenGroup.worldToLocal(point.clone());
+ const box=new THREE.Box3().setFromObject(specimenGroup);
+ // Use the model's current local vertical position so rotation/zoom does not
+ // change the anatomy mapping as it did in V5.
+ const localBox=new THREE.Box3().setFromObject(specimenGroup);
+ const y=(local.y-localBox.min.y)/(localBox.max.y-localBox.min.y||1);
+ if(y>.68)return 0; if(y<.33)return 2; return 1;
+}
+function fallbackScanFromScreen(clientX,clientY){
+ const rect=ui.canvas.getBoundingClientRect();
+ const x=(clientX-rect.left)/rect.width,y=(clientY-rect.top)/rect.height;
+ if(x<.22||x>.78||y<.18||y>.72)return;
+ scanAnatomy(y<.39?0:y>.58?2:1);
+}
+
 function bindCanvasInteractions(){
  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();let down=null;
  ui.canvas.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,t:performance.now()};});
  ui.canvas.addEventListener('pointerup',e=>{
-   if(!specimenGroup||!down)return;const dx=e.clientX-down.x,dy=e.clientY-down.y;if(Math.hypot(dx,dy)>12||performance.now()-down.t>700)return;
-   const rect=ui.canvas.getBoundingClientRect();pointer.x=((e.clientX-rect.left)/rect.width)*2-1;pointer.y=-((e.clientY-rect.top)/rect.height)*2+1;raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObject(specimenGroup,true);if(!hits.length)return;
-   const hit=hits[0],idx=classifyHit(hit.object,hit.point);scanAnatomy(idx);
+   if(!specimenGroup||!down)return;const dx=e.clientX-down.x,dy=e.clientY-down.y;if(Math.hypot(dx,dy)>14||performance.now()-down.t>700){down=null;return;}
+   const rect=ui.canvas.getBoundingClientRect();pointer.x=((e.clientX-rect.left)/rect.width)*2-1;pointer.y=-((e.clientY-rect.top)/rect.height)*2+1;raycaster.setFromCamera(pointer,camera);
+   const hits=raycaster.intersectObject(specimenGroup,true);
+   if(hits.length){scanAnatomy(classifyHit(hits[0].object,hits[0].point));}else{fallbackScanFromScreen(e.clientX,e.clientY);}
+   down=null;
  });
+}
+
+function setResearchPhase(next,announce=true){
+ researchPhase=(next+3)%3;
+ const root=document.body;root.dataset.researchPhase=String(researchPhase+1);
+ const title=$('scrollTitle'),sub=$('scrollSub'),stage=$('scrollStage');
+ const d=DATA[currentIndex];
+ const states=[
+  ['01','SPECIMEN IN FOCUS','Primary 3D specimen // observe surface, motion and silhouette.','OBSERVATION 01','Specimen in focus',d.summary],
+  ['02','ANATOMY REVEALED','Body regions are mapped to the specimen and can be inspected directly.','ANATOMY 02','Anatomy revealed',d.anatomy[1][1]],
+  ['03','ECOLOGICAL IMPACT','Field note // connect this specimen to the ecosystem around it.','FIELD NOTE 03','Ecological impact',d.note]
+ ];
+ const state=states[researchPhase];
+ stage.textContent=state[0];title.textContent=state[1];sub.textContent=state[2];
+ document.documentElement.style.setProperty('--research-progress',String(researchPhase/2));
+ targetCameraZ=researchPhase===1?3.65:researchPhase===2?4.85:4.45;
+ targetCameraY=researchPhase===1?.18:researchPhase===2?.38:.28;
+ targetTargetY=researchPhase===1?.05:researchPhase===2?.10:.03;
+ cameraTween=1;
+ root.classList.remove('research-shift'); void root.offsetWidth; root.classList.add('research-shift');
+ if(announce){const obs=document.querySelector('.research-observer'); if(obs){obs.classList.add('show'); clearTimeout(window.__researchObserverTimer); window.__researchObserverTimer=setTimeout(()=>obs.classList.remove('show'),1800);}}
 }
 function bindSwipe(){
  const el=$('viewer');let sx=0,sy=0,st=0;
+ el.addEventListener('wheel',e=>{
+   if(e.ctrlKey)return;
+   if(performance.now()<researchWheelLock)return;
+   if(Math.abs(e.deltaY)<Math.abs(e.deltaX)||Math.abs(e.deltaY)<12)return;
+   e.preventDefault(); e.stopPropagation(); researchWheelLock=performance.now()+520;
+   setResearchPhase(researchPhase+(e.deltaY>0?1:-1));
+ },{passive:false,capture:true});
  el.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=performance.now();},{passive:true});
- el.addEventListener('touchend',e=>{if(!sx)return;const t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy,dur=performance.now()-st;sx=0;if(dur<650&&Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.25){showSpecimen(currentIndex+(dx<0?1:-1));}} ,{passive:true});
+ el.addEventListener('touchend',e=>{if(!sx)return;const t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy,dur=performance.now()-st;sx=0;
+   if(dur<900&&Math.max(Math.abs(dx),Math.abs(dy))>48){if(Math.abs(dx)>Math.abs(dy)*1.18){showSpecimen(currentIndex+(dx<0?1:-1));}else if(Math.abs(dy)>Math.abs(dx)*1.12){setResearchPhase(researchPhase+(dy>0?1:-1));}}
+ },{passive:true});
+ setResearchPhase(0,false); const obs=document.querySelector('.research-observer'); if(obs){obs.classList.add('show'); setTimeout(()=>obs.classList.remove('show'),2200);}
 }
 function buildList(){DATA.forEach((d,i)=>{const row=document.createElement('button');row.className='specimen-item';row.innerHTML=`<span class="specimen-num">${String(i+1).padStart(2,'0')}</span><span><b class="specimen-name">${d.name}</b><em class="specimen-latin">${d.latin}</em></span><span class="specimen-dot">${iconFor(d.key)}</span>`;row.addEventListener('click',()=>showSpecimen(i));ui.list.appendChild(row);});}
 function bindUI(){
  $('prevBtn').addEventListener('click',()=>showSpecimen(currentIndex-1));$('nextBtn').addEventListener('click',()=>showSpecimen(currentIndex+1));
- $('resetBtn').addEventListener('click',()=>{camera.position.set(0,.28,4.45);controls.target.set(0,.03,0);controls.update();});
+ $('resetBtn').addEventListener('click',()=>{camera.position.set(0,.28,4.45);targetCameraZ=4.45;targetCameraY=.28;targetTargetY=.03;cameraTween=0;controls.target.set(0,.03,0);controls.update();});
  $('autoRotateBtn').addEventListener('click',e=>{autoRotate=!autoRotate;e.currentTarget.classList.toggle('on',autoRotate);e.currentTarget.querySelector('span').textContent=autoRotate?'ON':'OFF';});
  $('detailsBtn').addEventListener('click',()=>{ui.profile.classList.toggle('expanded');$('detailsBtn').textContent=ui.profile.classList.contains('expanded')?'COLLAPSE −':'EXPAND +';});
  $('closeScan').addEventListener('click',()=>ui.scan.classList.remove('open'));$('anatomyHint').addEventListener('click',()=>scanAnatomy(0));
@@ -239,7 +315,7 @@ function bindUI(){
 }
 
 async function showSpecimen(i){
- currentIndex=(i+DATA.length)%DATA.length;const d=DATA[currentIndex];activeModelToken++;const token=activeModelToken;updateUI(d);clearModel();
+ currentIndex=(i+DATA.length)%DATA.length;const d=DATA[currentIndex];activeModelToken++;const token=activeModelToken;updateUI(d);setResearchPhase(researchPhase,false);clearModel();
  placeholderGroup=buildPlaceholder(d);placeholderGroup.scale.setScalar(d.key==='butterfly'?1.12:1);scene.add(placeholderGroup);
  const loaded=await loadModel(d,false);if(token!==activeModelToken)return;
  if(loaded){specimenGroup=loaded;scene.add(specimenGroup);placeholderGroup.visible=false;setupAnimation(specimenGroup,d);setAnatomyNodes(specimenGroup,d);}
@@ -248,35 +324,31 @@ async function showSpecimen(i){
 }
 function setStatusFallback(){document.body.dataset.modelState='fallback';}
 function startRender(){requestAnimationFrame(render);}
-function render(){requestAnimationFrame(render);const dt=Math.min(clock.getDelta(),.05),t=performance.now();if(specimenGroup&&autoRotate)specimenGroup.rotation.y+=.0038;if(placeholderGroup){placeholderGroup.rotation.y+=autoRotate?.0026:0;placeholderGroup.position.y=Math.sin(t*.0013)*.035;}if(mixer) mixer.update(dt);
+function render(){requestAnimationFrame(render);const dt=Math.min(clock.getDelta(),.05),t=performance.now();if(specimenGroup&&autoRotate)specimenGroup.rotation.y+=.0038; if(cameraTween>0){camera.position.z=THREE.MathUtils.lerp(camera.position.z,targetCameraZ,.075);camera.position.y=THREE.MathUtils.lerp(camera.position.y,targetCameraY,.075);controls?.target.set(0,targetTargetY,0);cameraTween-=.035;if(cameraTween<=0)cameraTween=0;}if(placeholderGroup){placeholderGroup.rotation.y+=autoRotate?.0026:0;placeholderGroup.position.y=Math.sin(t*.0013)*.035;}if(mixer) mixer.update(dt);
  if(specimenGroup && wingAnimTargets.length){
-   wingAnimTargets.forEach(w=>{w.object.rotation.z=w.base.z+Math.sin(t*.022+w.phase)*w.amp; w.object.rotation.y=w.base.y+Math.cos(t*.018+w.phase)*w.amp*.22;});
+   wingAnimTargets.forEach(w=>{w.object.rotation.z=w.base.z+Math.sin(t*.018+w.phase)*w.amp; w.object.rotation.y=w.base.y+Math.cos(t*.014+w.phase)*w.amp*.16;});
  }
- if(specimenGroup && ['mosquito'].includes(DATA[currentIndex].key)) specimenGroup.position.y=-.18+Math.sin(t*.0017)*.035;
- ghostViewers.forEach(g=>g.render(t));controls.update();renderer.render(scene,camera);document.documentElement.style.setProperty('--scroll-progress',Math.min(1,window.scrollY/Math.max(1,document.body.scrollHeight-innerHeight)));}
-function bindScroll(){
- const title=$('scrollTitle'),sub=$('scrollSub'),stage=$('scrollStage');
- window.addEventListener('scroll',()=>{
-   const max=Math.max(1,document.body.scrollHeight-innerHeight),p=Math.min(1,window.scrollY/max);
-   document.body.style.setProperty('--scroll-progress',p.toFixed(3));
-   document.querySelector('.stage-center')?.style.setProperty('--scroll-shift',`${p*44}px`);
-   if(p<.33){stage.textContent='01';title.textContent='SPECIMEN IN FOCUS';sub.textContent='Scroll to enter the deeper research layer.';}
-   else if(p<.68){stage.textContent='02';title.textContent='ANATOMY REVEALED';sub.textContent='The catalogue shifts from observation to biological context.';}
-   else{stage.textContent='03';title.textContent='ECOLOGICAL IMPACT';sub.textContent='Small organisms, large systems — explore the field note.';}
- },{passive:true});
+ ghostViewers.forEach(g=>g.render(t));if(controls)controls.update();if(renderer&&!rendererFailed)renderer.render(scene,camera);}
+
+async function preloadAllBackground(){
+ const queue=DATA.filter(d=>!modelCache.has(d.key)); let cursor=0;
+ const worker=async()=>{while(cursor<queue.length){const d=queue[cursor++];await loadModel(d,false);if(d===DATA[(currentIndex+1)%DATA.length]||d===DATA[(currentIndex+DATA.length-1)%DATA.length])updateGhosts();}};
+ await Promise.all([worker(),worker()]);
 }
+
 function hidePreloader(){document.body.classList.add('ready');setTimeout(()=>ui.preloader.remove(),520);}
 async function boot(){
- buildList();bindUI();initScene();initGhosts();bindCanvasInteractions();bindSwipe();bindScroll();startRender();
+ buildList();bindUI();initScene();initGhosts();bindCanvasInteractions();bindSwipe();startRender();
  updatePreloader(8,'INITIALISING OPTICAL ARRAY','GENESIS LAB // BOOT');
- const first=DATA[0];updatePreloader(12,'LOADING '+first.name.toUpperCase(),'LOCAL GLB // DRACO');
- const loaded=await loadModel(first,true);
- updatePreloader(94,loaded?'CALIBRATING 3D STAGE':'BUILDING FALLBACK PREVIEW','LIGHTING // SHADOW // CAMERA');
- await new Promise(r=>setTimeout(r,180));
+ const first=DATA[0],next=DATA[1],prev=DATA[DATA.length-1];
+ updatePreloader(12,'PRELOADING PRIMARY SPECIMEN','LOCAL GLB // DRACO');
+ const [loaded,loadedNext,loadedPrev]=await Promise.all([loadModel(first,true),loadModel(next,false),loadModel(prev,false)]);
+ updatePreloader(92,'CALIBRATING 3D STAGE','LIGHTING // SHADOW // CAMERA');
  await showSpecimen(0);
- updatePreloader(100,'SPECIMEN READY','INTERACTIVE 3D // TOUCH ENABLED');
- await new Promise(r=>setTimeout(r,280));hidePreloader();booted=true;
- // Neighbor preload runs after the first paint so first interaction stays fast.
- preloadNeighbors();
+ updateGhosts();
+ updatePreloader(100,'STAGE READY','INTERACTIVE 3D // TOUCH ENABLED');
+ await new Promise(r=>setTimeout(r,220));hidePreloader();booted=true;
+ // Remaining specimens continue decoding in the background after first paint.
+ preloadAllBackground();
 }
-boot().catch(err=>{console.error('[INSECTA] Fatal boot error',err);updatePreloader(100,'BOOT ERROR — CHECK CONSOLE','SYSTEM');});
+boot().catch(err=>{console.error('[INSECTA] Fatal boot error',err);document.body.dataset.modelState='boot-error';updatePreloader(100,'INTERFACE ONLINE — 3D SAFE MODE','SYSTEM');setTimeout(hidePreloader,650);});
