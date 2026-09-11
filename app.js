@@ -1,4 +1,4 @@
-/* INSECTA V14.2 — cache-busted, null-safe event bindings */
+/* INSECTA V15.1 — duplicate-declaration fix and boot stability */
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/loaders/DRACOLoader.js';
@@ -18,7 +18,7 @@ const DATA = [
 
 const $=id=>document.getElementById(id);
 const ui={
- preloader:$('preloader'),loadStage:$('loadStage'),loadPct:$('loadPct'),loadBar:$('loadBar'),canvas:$('mainCanvas'),
+ preloader:$('preloader'),loadStage:$('loadStage'),loadPct:$('loadPct'),loadBar:$('loadBar'),canvas:$('mainCanvas'),viewer:$('viewer'),
  title:$('specimenTitle'),latin:$('specimenLatin'),kicker:$('taxKicker'),no:$('specimenNo'),cards:$('cards'),
  researchBtn:$('researchToggle'),researchStep:$('researchStep'),researchTitle:$('researchTitle'),researchSub:$('researchSub'),researchStrip:$('researchStrip'),
  detail:$('detailHud'),detailTitle:$('detailTitle'),detailText:$('detailText'),detailMeta:$('detailMeta'),
@@ -39,15 +39,7 @@ const viewStates=[
 ];
 const audio={ctx:null,beep(type='click'){if(!soundOn)return;try{this.ctx??=new(window.AudioContext||window.webkitAudioContext)();this.ctx.resume();const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.connect(g);g.connect(this.ctx.destination);const t=this.ctx.currentTime;o.type='sine';o.frequency.setValueAtTime(type==='switch'?210:type==='pin'?640:420,t);o.frequency.exponentialRampToValueAtTime(type==='switch'?430:260,t+.1);g.gain.setValueAtTime(.016,t);g.gain.exponentialRampToValueAtTime(.001,t+.11);o.start(t);o.stop(t+.12);}catch{}}};
 
-const $=id=>document.getElementById(id);
-const ui={preloader:$('preloader'),loadStage:$('loadStage'),loadPct:$('loadPct'),loadBar:$('loadBar'),canvas:$('mainCanvas'),viewer:$('viewer'),title:$('specimenTitle'),latin:$('specimenLatin'),kicker:$('taxKicker'),no:$('specimenNo'),cards:$('cards'),researchBtn:$('researchToggle'),researchStep:$('researchStep'),researchTitle:$('researchTitle'),researchSub:$('researchSub'),researchStrip:$('researchStrip'),detail:$('detailHud'),detailTitle:$('detailTitle'),detailText:$('detailText'),detailMeta:$('detailMeta'),order:$('order'),family:$('family'),range:$('range'),role:$('role'),profile:$('profile'),infoPanel:$('infoPanel'),infoTitle:$('infoTitle'),infoText:$('infoText'),infoNote:$('infoNote'),infoDiet:$('infoDiet'),infoSize:$('infoSize'),infoLife:$('infoLife'),sound:$('soundBtn')};
 
-let scene,camera,renderer,controls,loader,draco;
-let lastTime=performance.now(),elapsed=0,index=0,research=0,autoRotate=true,soundOn=false,transitionLock=false;
-let currentRig=null,currentModel=null,currentMixer=null;
-let targetCam={x:0,y:.72,z:5.15,tx:0,ty:.72}; let viewTween=null;
-let sharedLogoTexture=null;
-const cache=new Map(),loading=new Map();
 const CARD_COUNT=DATA.length;
 const FOCUS={
  butterfly:[[-.42,.72],[0,.42],[.08,.66]],
