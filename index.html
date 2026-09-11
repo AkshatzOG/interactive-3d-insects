@@ -6,97 +6,45 @@
 <meta name="theme-color" content="#020711">
 <meta name="description" content="INSECTA — Genesis Lab / Void Vipers interactive 3D insect archive.">
 <link rel="preload" as="image" href="./assets/lab-background.png">
+<link rel="preload" as="image" href="./assets/favicon.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Roboto:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./styles.css">
-<link rel="icon" href="./assets/logo.png">
+<link rel="icon" type="image/jpeg" href="./assets/favicon.jpg">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js"}}</script>
 <title>INSECTA — Genesis Lab</title>
 </head>
 <body>
 <div id="preloader" class="preloader">
-  <div class="loader-backdrop"></div>
+  <div class="loader-bg"></div><div class="loader-vignette"></div>
   <div class="loader-ui">
-    <div class="loader-brand"><span class="mark">GL</span><div><strong>GENESIS LAB</strong><span>/ VOID VIPERS</span></div></div>
+    <div class="loader-brand"><img src="./assets/favicon.jpg" alt="Void Vipers"><div><strong>GENESIS LAB</strong><span>/ VOID VIPERS</span></div></div>
     <div class="loader-kicker">DIGITAL INSECTA // LOCAL SPECIMEN ARCHIVE</div>
     <h1>PREPARING<br><em>THE LIVING CATALOGUE.</em></h1>
-    <div class="loader-ring"><span>GL</span></div>
-    <div class="loader-copy"><span id="loadStage">INITIALISING OPTICAL ARRAY</span><b id="loadPct">0%</b></div>
+    <div class="loader-copy"><span id="loadStage">INITIALISING 3D ENGINE</span><b id="loadPct">0%</b></div>
     <div class="loader-track"><span id="loadBar"></span></div>
     <div class="loader-foot"><span>GLB CACHE</span><span>DRACO</span><span>THREE.JS</span><span>TOUCH / SWIPE</span></div>
   </div>
 </div>
-
-<div class="lab-bg" aria-hidden="true"></div>
-<div class="screen-grain" aria-hidden="true"></div>
-<div class="topbar">
-  <div class="brand-lockup">
-    <div class="brand-box">GL</div>
-    <div><div class="brand-title">GENESIS LAB <i>/</i> VOID VIPERS</div><div class="brand-sub">FIELD STUDY // DIGITAL INSECTA</div></div>
-  </div>
-  <div class="status"><span class="status-dot"></span><span>3D SCANNER ONLINE</span><i></i><span id="clock"></span></div>
-</div>
-
-<main id="experience" class="experience">
-  <section id="viewer" class="viewer" aria-label="Interactive insect specimen viewer">
-    <div class="stage-hud top-left"><span id="specimenNo">01</span><small>/ 08</small></div>
-    <div class="stage-title-block">
-      <span class="kicker" id="taxKicker">LEPIDOPTERA // NYMPHALIDAE</span>
-      <h1 id="specimenTitle">Butterfly</h1>
-      <p id="specimenLatin">Danaus plexippus</p>
-    </div>
-    <div class="scan-prompt" id="scanPrompt"><span class="pulse"></span>TOUCH SPECIMEN TO SCAN</div>
-
-    <div class="prevnext prev" id="prevFloat"><span>PREVIOUS</span><b id="prevMini">Mosquito</b></div>
-    <div class="prevnext next" id="nextFloat"><span>NEXT</span><b id="nextMini">Honey Bee</b></div>
-
-    <button class="arrow prev-arrow" id="prevBtn" aria-label="Previous insect">←</button>
-    <button class="arrow next-arrow" id="nextBtn" aria-label="Next insect">→</button>
-
-    <canvas id="mainCanvas"></canvas>
-    <div class="scanner-floor" aria-hidden="true"><div class="floor-ring a"></div><div class="floor-ring b"></div><div class="floor-ring c"></div><div class="floor-core"></div></div>
-    <div class="stage-shadow" aria-hidden="true"></div>
-
-    <div class="detail-hud" id="detailHud">
-      <div class="detail-head"><span id="detailMode">SPECIMEN</span><button id="closeDetail" aria-label="Close anatomy detail">×</button></div>
-      <h2 id="detailTitle">Wing Surface</h2>
-      <p id="detailText">Microscopic wing scales scatter light and contribute to colour, signalling and camouflage.</p>
-      <div class="detail-meta"><span id="detailMeta">FLIGHT SURFACE</span><span>LIVE SCAN</span></div>
-    </div>
-
-    <div class="research-strip" id="researchStrip">
-      <div><span>RESEARCH VIEW</span><b id="researchStep">01</b><small>/ 03</small></div>
-      <strong id="researchTitle">WHOLE SPECIMEN</strong>
-      <span id="researchSub">Observe silhouette, movement and surface.</span>
-    </div>
-
-    <div class="profile" id="profile">
-      <div class="profile-head"><span>FIELD DATA</span><button id="expandBtn">DETAILS +</button></div>
-      <div class="profile-main">
-        <div><small>ORDER</small><strong id="order">Lepidoptera</strong></div>
-        <div><small>FAMILY</small><strong id="family">Nymphalidae</strong></div>
-        <div><small>RANGE</small><strong id="range">Worldwide</strong></div>
-        <div><small>ROLE</small><strong id="role">Pollinator</strong></div>
-      </div>
-      <div class="profile-extra" id="profileExtra">
-        <p id="summary"></p>
-        <div><span>DIET</span><b id="diet"></b></div><div><span>SIZE</span><b id="size"></b></div><div><span>LIFESPAN</span><b id="life"></b></div>
-      </div>
-    </div>
-
-    <div class="card-carousel" id="cardCarousel" aria-label="Specimen carousel">
-      <button class="card-nav card-left" id="cardLeft" aria-label="Previous specimen">‹</button>
-      <div class="cards" id="cards"></div>
-      <button class="card-nav card-right" id="cardRight" aria-label="Next specimen">›</button>
-      <div class="card-help">SWIPE HORIZONTALLY // CENTER CARD IS ACTIVE</div>
-    </div>
-
-    <div class="bottom-controls"><button id="autoBtn">AUTO ROTATE <span>ON</span></button><button id="resetBtn">RESET VIEW</button><button id="soundBtn" class="sound-off">SOUND OFF</button></div>
-    <div class="research-hint">SCROLL / SWIPE DOWN TO INSPECT · SWIPE LEFT / RIGHT TO CHANGE SPECIMEN</div>
-  </section>
-</main>
-
+<div class="lab-bg" aria-hidden="true"></div><div class="screen-grain" aria-hidden="true"></div>
+<header class="topbar">
+  <div class="brand-lockup"><div class="brand-box"><img src="./assets/favicon.jpg" alt="Void Vipers"></div><div><div class="brand-title">GENESIS LAB <i>/</i> VOID VIPERS</div><div class="brand-sub">FIELD STUDY // DIGITAL INSECTA</div></div></div>
+</header>
+<main id="experience" class="experience"><section id="viewer" class="viewer" aria-label="Interactive 3D insect specimen viewer">
+  <div class="stage-hud top-left"><strong id="specimenNo">01</strong><small>/ 08</small></div>
+  <div class="stage-hud top-right"><small id="viewLabel">01</small><span>RESEARCH VIEW</span></div>
+  <div class="stage-title-block"><span class="kicker" id="taxKicker"></span><h1 id="specimenTitle">Butterfly</h1><p id="specimenLatin">Danaus plexippus</p></div>
+  <div class="scan-prompt"><span class="pulse"></span>TOUCH SPECIMEN TO SCAN</div>
+  <div class="prevnext prev"><span>PREVIOUS</span><b id="prevMini">Mosquito</b></div><div class="prevnext next"><span>NEXT</span><b id="nextMini">Honey Bee</b></div>
+  <button class="arrow prev-arrow" id="prevBtn" aria-label="Previous insect">←</button><button class="arrow next-arrow" id="nextBtn" aria-label="Next insect">→</button>
+  <canvas id="mainCanvas"></canvas>
+  <div class="profile" id="profile"><div class="profile-head"><span>FIELD DATA</span><button id="expandBtn" type="button">DETAILS +</button></div><div class="profile-main"><div><small>ORDER</small><strong id="order">Lepidoptera</strong></div><div><small>FAMILY</small><strong id="family">Nymphalidae</strong></div><div><small>RANGE</small><strong id="range">Worldwide</strong></div><div><small>ROLE</small><strong id="role">Pollinator</strong></div></div><div class="profile-extra"><p id="summary"></p><div><span>DIET</span><b id="diet"></b></div><div><span>SIZE</span><b id="size"></b></div><div><span>LIFESPAN</span><b id="life"></b></div></div></div>
+  <div class="detail-hud" id="detailHud" data-open="0"><div class="detail-head"><span>ANATOMY SCAN</span><button id="closeDetail" aria-label="Close anatomy detail">×</button></div><h2 id="detailTitle">Wing Surface</h2><p id="detailText"></p><div class="detail-meta"><span id="detailMeta">FLIGHT SURFACE</span><span>LIVE</span></div></div>
+  <div class="research-strip" id="researchStrip"><div><span>RESEARCH VIEW</span><b id="researchStep">01</b></div><strong id="researchTitle">WHOLE SPECIMEN</strong><span id="researchSub">Full specimen · default presentation</span></div>
+  <div class="card-carousel" id="cardCarousel"><button class="card-nav card-left" id="cardLeft">‹</button><div class="cards" id="cards"></div><button class="card-nav card-right" id="cardRight">›</button><div class="card-help"><span id="stageHint">01 / 08 · SWIPE OR SELECT A SPECIMEN</span></div></div>
+  <div class="bottom-controls"><button id="autoBtn">AUTO ROTATE <span>ON</span></button><button id="resetBtn">RESET VIEW</button><button id="soundBtn" class="sound-off">SOUND OFF</button></div>
+  <div class="gesture-hint">↑↓ INSPECT PARTS &nbsp; · &nbsp; ←→ CHANGE SPECIMEN &nbsp; · &nbsp; DRAG ROTATE &nbsp; · &nbsp; PINCH / CTRL+WHEEL ZOOM</div>
+</section></main>
 <script type="module" src="./app.js"></script>
-</body>
-</html>
+</body></html>

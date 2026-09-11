@@ -1,22 +1,15 @@
-# INSECTA — Genesis Lab / Void Vipers — V11
+# INSECTA — Genesis Lab / Void Vipers
 
-Production static/Node build for the interactive 3D insect archive.
-
-## Interaction
-- Horizontal swipe / arrows / carousel cards: change specimen.
-- Wheel over the viewer / vertical swipe / arrow up-down: research view.
-- Drag: rotate camera.
-- Ctrl + wheel / pinch: zoom.
-- Click a specimen body region: anatomy scan.
-
-## V11 fixes
-- Three.js animation pipeline now filters invalid animation tracks so malformed clips cannot block the whole scene.
-- Added a floating 3D specimen pedestal rig: model and pedestal are parented together and therefore move/zoom/rotate as one display unit.
-- Pedestal carries a Void Vipers logo decal, metal top, accent rings, contact glow and contact shadow.
-- Rebalanced hierarchy so the current specimen information sits above the carousel and the carousel is fully anchored to the bottom edge.
-- Improved readability of low-contrast bottom/technical text.
-- Main fonts are Montserrat/Roboto; minor technical labels use IBM Plex Mono.
-- Logo is preloaded before the first rig is built.
+V12 production build. Static frontend with Three.js + Draco, plus a small Node server for Render.
 
 ## Run
-`npm start` or `node server.js`
+`npm start` then open http://localhost:10000
+
+## Interactions
+- Wheel / vertical swipe: four research views (whole specimen -> head -> core body -> wings)
+- Horizontal swipe / cards / arrows: switch insect in circular carousel
+- Drag: rotate
+- Pinch / Ctrl+wheel: zoom
+- Click a model area: anatomy scan
+
+The primary model and adjacent specimens are decoded during the startup screen; remaining models preload in the background.
