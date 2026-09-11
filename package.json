@@ -1,1 +1,11 @@
-{"name":"insecta-genesis-lab","private":true,"version":"9.0.0","scripts":{"start":"node server.js"},"engines":{"node":">=18"}}
+{
+  "name": "insecta-genesis-lab",
+  "private": true,
+  "version": "11.0.0",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

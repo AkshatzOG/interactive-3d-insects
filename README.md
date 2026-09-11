@@ -1,59 +1,22 @@
-# INSECTA — Genesis Lab / Void Vipers
+# INSECTA — Genesis Lab / Void Vipers — V11
 
-V9 solo-project build: a static client-side Three.js specimen archive with an optional Node HTTP server for deployment.
+Production static/Node build for the interactive 3D insect archive.
 
-## Run locally
+## Interaction
+- Horizontal swipe / arrows / carousel cards: change specimen.
+- Wheel over the viewer / vertical swipe / arrow up-down: research view.
+- Drag: rotate camera.
+- Ctrl + wheel / pinch: zoom.
+- Click a specimen body region: anatomy scan.
 
-### Live Server
-Open the project folder in VS Code and launch `index.html` with Live Server.
+## V11 fixes
+- Three.js animation pipeline now filters invalid animation tracks so malformed clips cannot block the whole scene.
+- Added a floating 3D specimen pedestal rig: model and pedestal are parented together and therefore move/zoom/rotate as one display unit.
+- Pedestal carries a Void Vipers logo decal, metal top, accent rings, contact glow and contact shadow.
+- Rebalanced hierarchy so the current specimen information sits above the carousel and the carousel is fully anchored to the bottom edge.
+- Improved readability of low-contrast bottom/technical text.
+- Main fonts are Montserrat/Roboto; minor technical labels use IBM Plex Mono.
+- Logo is preloaded before the first rig is built.
 
-### Node server
-```bash
-node server.js
-```
-Then open `http://localhost:10000/`.
-
-The server adds long-lived immutable caching for GLB/image assets, HTTP range support, and Brotli/Gzip compression for text assets.
-
-## Render
-Create a **Web Service** using the repository root.
-
-- Runtime: Node
-- Start command: `node server.js`
-- No build command is required.
-
-## Main interactions
-
-- Horizontal swipe / arrow controls / specimen cards: switch insect.
-- Vertical wheel / swipe / arrow keys: move between three research views.
-- Drag: rotate the current 3D specimen.
-- Pinch or Ctrl + wheel: zoom.
-- Click a model region: anatomy detail scan.
-- Auto Rotate and Sound are optional controls.
-
-## Performance strategy
-
-Only the first specimen plus its immediate neighbours are required before the loading screen ends. Additional models are prefetched through the browser cache after the experience becomes interactive. The GLBs stay local; Three.js and the Draco decoder are loaded from CDN.
-
-## Project layout
-
-```text
-index.html
-app.js
-styles.css
-server.js
-package.json
-assets/
-  lab-background.png
-  logo.png
-  cards/*.jpg
-models/
-  ant.glb
-  bee.glb
-  butterfly.glb
-  cockroach.glb
-  dragonfly.glb
-  housefly.glb
-  ladybug.glb
-  mosquito_3d_model_free.glb
-```
+## Run
+`npm start` or `node server.js`
