@@ -1,3 +1,4 @@
+/* INSECTA V14.2 — cache-busted, null-safe event bindings */
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/loaders/DRACOLoader.js';
@@ -114,13 +115,13 @@ function on(id,event,handler,options){const el=document.getElementById(id);if(!e
 function setupEvents(){
  on('prevBtn','click',()=>switchTo(index-1));
  on('nextBtn','click',()=>switchTo(index+1));
- if(ui.researchBtn) ui.researchBtn.addEventListener('click',()=>stepResearch(1));
+ on('researchToggle','click',()=>stepResearch(1));
  on('expandBtn','click',()=>{if(ui.infoPanel?.dataset.open==='1')closeInfo();else openInfo();});
  on('closeInfo','click',closeInfo);
  on('closeDetail','click',closeDetail);
  on('autoBtn','click',e=>{autoRotate=!autoRotate;const label=e.currentTarget.querySelector('span');if(label)label.textContent=autoRotate?'ON':'OFF';});
  on('resetBtn','click',()=>{research=0;closeInfo();closeDetail();applyResearch(false);if(controls){controls.target.set(0,targetCam.ty,0);}if(camera){camera.position.set(0,targetCam.y,5.2);}});
- if(ui.sound) ui.sound.addEventListener('click',()=>{soundOn=!soundOn;ui.sound.textContent=soundOn?'SOUND ON':'SOUND OFF';ui.sound.classList.toggle('on',soundOn);audio.beep('click');});
+ on('soundBtn','click',()=>{soundOn=!soundOn;ui.sound.textContent=soundOn?'SOUND ON':'SOUND OFF';ui.sound.classList.toggle('on',soundOn);audio.beep('click');});
  window.addEventListener('keydown',e=>{if(e.key==='ArrowRight')switchTo(index+1);else if(e.key==='ArrowLeft')switchTo(index-1);else if(e.key==='ArrowUp')stepResearch(-1);else if(e.key==='ArrowDown')stepResearch(1);else if(e.key==='Escape'){closeInfo();closeDetail();}});
  let sx=0,sy=0;
  if(ui.canvas){
