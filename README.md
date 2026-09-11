@@ -27,3 +27,6 @@ Eight local Draco-compressed GLB models are stored in `models/`. The supplied la
 ## Notes
 
 The active specimen and floating pedestal are one Three.js rig, so they move together during rotation, zoom and research transitions. Models are normalized to remain visually contained on the display disk while occupying the central viewport.
+
+
+V15.2 fixes the render-loop state by declaring the research camera tween state before animation begins, preventing the animation loop from terminating before the first frame.

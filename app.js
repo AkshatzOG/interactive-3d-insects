@@ -1,4 +1,4 @@
-/* INSECTA V15.1 — duplicate-declaration fix and boot stability */
+/* INSECTA V15.2 — render-loop and interaction stability fix */
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/loaders/DRACOLoader.js';
@@ -28,7 +28,7 @@ const ui={
 };
 let scene,camera,renderer,controls,loader,draco;
 let lastTime=performance.now(),elapsed=0,index=0,research=0,autoRotate=true,soundOn=false,transitionLock=false;
-let currentRig=null,currentModel=null,currentMixer=null;
+let currentRig=null,currentModel=null,currentMixer=null,viewTween=null;
 let targetCam={z:5.2,y:.65,tx:0,ty:.65};
 const cache=new Map(),loading=new Map(); let sharedLogoTexture=null;
 const viewStates=[
