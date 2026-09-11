@@ -110,16 +110,35 @@ function switchTo(next){if(transitionLock)return;const target=(next+8)%8;if(targ
 }
 function preloadNeighbors(){const ids=[(index+1)%8,(index+7)%8,(index+2)%8,(index+6)%8];const run=async()=>{for(const id of ids){const d=DATA[id];if(!cache.has(d.key))try{await loadModel(d)}catch(err){console.warn('Preload failed',d.key,err);}}};(window.requestIdleCallback||((fn)=>setTimeout(fn,350)))(run);}
 async function boot(){try{initScene();setLoad(7,'INITIALISING 3D ENGINE');try{sharedLogoTexture=await new THREE.TextureLoader().loadAsync('./assets/logo.png');sharedLogoTexture.colorSpace=THREE.SRGBColorSpace;}catch{}setLoad(14,'PRELOADING PRIMARY SPECIMEN');const primaryPromise=loadModel(DATA[0],true);const neighbors=Promise.all([loadModel(DATA[7]),loadModel(DATA[1])]);const [primary]=await Promise.all([primaryPromise,neighbors]);setLoad(78,'BUILDING SPECIMEN RIG');setupMotion(primary,DATA[0]);currentModel=primary;currentRig=buildFloatingStage(primary,DATA[0]);scene.add(currentRig);updateUI(DATA[0]);renderCards();applyResearch(false);setLoad(95,'FINAL OPTICAL CALIBRATION');await new Promise(r=>setTimeout(r,160));setLoad(100,'CATALOGUE READY');setTimeout(()=>ui.preloader.classList.add('hidden'),220);preloadNeighbors();animate();}catch(err){console.error('BOOT FAILED',err);setLoad(100,'3D OFFLINE — SHOWING CATALOGUE');setTimeout(()=>ui.preloader.classList.add('hidden'),650);if(!scene)initScene();renderCards();animate();}}
+function on(id,event,handler,options){const el=document.getElementById(id);if(!el){console.warn(`[INSECTA] Missing #${id}; skipped ${event} binding`);return null;}el.addEventListener(event,handler,options);return el;}
 function setupEvents(){
- $('prevBtn').addEventListener('click',()=>switchTo(index-1));$('nextBtn').addEventListener('click',()=>switchTo(index+1));
- ui.researchBtn.addEventListener('click',()=>stepResearch(1));$('expandBtn').addEventListener('click',()=>{if(ui.infoPanel.dataset.open==='1')closeInfo();else openInfo();});$('closeInfo').addEventListener('click',closeInfo);$('closeDetail').addEventListener('click',closeDetail);
- $('autoBtn').addEventListener('click',e=>{autoRotate=!autoRotate;e.currentTarget.querySelector('span').textContent=autoRotate?'ON':'OFF';});
- $('resetBtn').addEventListener('click',()=>{research=0;closeInfo();closeDetail();applyResearch(false);controls.target.set(0,targetCam.ty,0);camera.position.set(0,targetCam.y,5.2);});
- ui.sound.addEventListener('click',()=>{soundOn=!soundOn;ui.sound.textContent=soundOn?'SOUND ON':'SOUND OFF';ui.sound.classList.toggle('on',soundOn);audio.beep('click');});
+ on('prevBtn','click',()=>switchTo(index-1));
+ on('nextBtn','click',()=>switchTo(index+1));
+ if(ui.researchBtn) ui.researchBtn.addEventListener('click',()=>stepResearch(1));
+ on('expandBtn','click',()=>{if(ui.infoPanel?.dataset.open==='1')closeInfo();else openInfo();});
+ on('closeInfo','click',closeInfo);
+ on('closeDetail','click',closeDetail);
+ on('autoBtn','click',e=>{autoRotate=!autoRotate;const label=e.currentTarget.querySelector('span');if(label)label.textContent=autoRotate?'ON':'OFF';});
+ on('resetBtn','click',()=>{research=0;closeInfo();closeDetail();applyResearch(false);if(controls){controls.target.set(0,targetCam.ty,0);}if(camera){camera.position.set(0,targetCam.y,5.2);}});
+ if(ui.sound) ui.sound.addEventListener('click',()=>{soundOn=!soundOn;ui.sound.textContent=soundOn?'SOUND ON':'SOUND OFF';ui.sound.classList.toggle('on',soundOn);audio.beep('click');});
  window.addEventListener('keydown',e=>{if(e.key==='ArrowRight')switchTo(index+1);else if(e.key==='ArrowLeft')switchTo(index-1);else if(e.key==='ArrowUp')stepResearch(-1);else if(e.key==='ArrowDown')stepResearch(1);else if(e.key==='Escape'){closeInfo();closeDetail();}});
- let sx=0,sy=0,dragStart=0;ui.canvas.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY;dragStart=performance.now();},{passive:true});ui.canvas.addEventListener('pointerup',e=>{const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))>52){if(Math.abs(dx)>Math.abs(dy))switchTo(index+(dx<0?1:-1));else stepResearch(dy>0?1:-1);return;}if(e.pointerType==='touch'||transitionLock||!currentModel)return;const r=ui.canvas.getBoundingClientRect(),p=new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1),ray=new THREE.Raycaster();ray.setFromCamera(p,camera);const hit=ray.intersectObject(currentModel,true)[0];if(!hit)return;const local=currentModel.worldToLocal(hit.point.clone()),box=new THREE.Box3().setFromObject(currentModel),h=(local.y-box.min.y)/(box.max.y-box.min.y||1);let part=h>.68?0:h<.34?2:1;if(Math.abs(local.x)>Math.max(.45,(box.max.x-box.min.x)*.2))part=1;openDetail(part,true);});
- $('viewer').addEventListener('wheel',e=>{if(Math.abs(e.deltaY)<8)return;e.preventDefault();stepResearch(e.deltaY>0?1:-1);},{passive:false});
- ui.cards.addEventListener('pointerdown',e=>{ui.cards.dataset.sx=e.clientX;},{passive:true});ui.cards.addEventListener('pointerup',e=>{const dx=e.clientX-Number(ui.cards.dataset.sx||e.clientX);if(Math.abs(dx)>50)switchTo(index+(dx<0?1:-1));});
+ let sx=0,sy=0;
+ if(ui.canvas){
+   ui.canvas.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY;},{passive:true});
+   ui.canvas.addEventListener('pointerup',e=>{
+     const dx=e.clientX-sx,dy=e.clientY-sy;
+     if(Math.max(Math.abs(dx),Math.abs(dy))>52){if(Math.abs(dx)>Math.abs(dy))switchTo(index+(dx<0?1:-1));else stepResearch(dy>0?1:-1);return;}
+     if(e.pointerType==='touch'||transitionLock||!currentModel||!camera)return;
+     const r=ui.canvas.getBoundingClientRect(),p=new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1),ray=new THREE.Raycaster();ray.setFromCamera(p,camera);const hit=ray.intersectObject(currentModel,true)[0];if(!hit)return;
+     const local=currentModel.worldToLocal(hit.point.clone()),box=new THREE.Box3().setFromObject(currentModel),h=(local.y-box.min.y)/(box.max.y-box.min.y||1);let part=h>.68?0:h<.34?2:1;if(Math.abs(local.x)>Math.max(.45,(box.max.x-box.min.x)*.2))part=1;openDetail(part,true);
+   });
+ }
+ const viewer=document.getElementById('viewer');
+ if(viewer) viewer.addEventListener('wheel',e=>{if(Math.abs(e.deltaY)<8)return;e.preventDefault();stepResearch(e.deltaY>0?1:-1);},{passive:false});
+ if(ui.cards){
+   ui.cards.addEventListener('pointerdown',e=>{ui.cards.dataset.sx=e.clientX;},{passive:true});
+   ui.cards.addEventListener('pointerup',e=>{const dx=e.clientX-Number(ui.cards.dataset.sx||e.clientX);if(Math.abs(dx)>50)switchTo(index+(dx<0?1:-1));});
+ }
 }
 function animate(){requestAnimationFrame(animate);const now=performance.now(),delta=Math.min(.05,(now-lastTime)/1000);lastTime=now;elapsed+=delta;controls?.update();if(currentMixer)currentMixer.update(delta);currentRigMotion(now);camera.position.z=THREE.MathUtils.damp(camera.position.z,targetCam.z,6,delta);camera.position.y=THREE.MathUtils.damp(camera.position.y,targetCam.y,6,delta);controls?.target.lerp(new THREE.Vector3(targetCam.tx,targetCam.ty,0),Math.min(1,delta*7));if(renderer&&scene&&camera)renderer.render(scene,camera);}
 setupEvents();boot();
