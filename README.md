@@ -1,34 +1,59 @@
-# INSECTA — Genesis Lab / Void Vipers — V8
+# INSECTA — Genesis Lab / Void Vipers
 
-Clean interaction/presentation pass based on the coordinator review.
+V9 solo-project build: a static client-side Three.js specimen archive with an optional Node HTTP server for deployment.
 
-## V7 priorities
-- Primary GLB begins loading while the preload screen is visible; adjacent specimens are also preloaded before reveal.
-- Remaining catalogue models continue decoding in the background after first paint.
-- Clean single-layout composition: specimen, anatomy/detail text, minimal controls; side rails are hidden from the production composition.
-- Three.js lighting is tuned for the dark supplied laboratory background using ACES tone mapping, stronger key/fill/rim lighting and shadow support.
-- Scroll is an intentional interaction: wheel over the viewer advances research layers 01/03 → 02/03 → 03/03 with camera and UI transitions. Ctrl+wheel remains 3D zoom.
-- Vertical touch swipe changes research layer; horizontal swipe changes specimen.
-- Pinch and OrbitControls remain available for 3D zoom/rotation.
-- Research phase transitions animate the camera, specimen presentation and information panel instead of creating a fake document scrollbar.
-- Anatomy interaction remains tolerant to model rotation/zoom, with mesh, local-space and screen-region fallbacks plus explicit anatomy chips.
-- Bee colour material is forced through a modern PBR material using the embedded albedo map with sRGB color space.
-- Butterfly, Bee and Cockroach use their supplied GLTF animations where present. Dragonfly and House Fly use restrained procedural wing motion when separate wing nodes are available.
-- Mobile uses `100dvh`, fixed single-screen composition and reduced renderer DPR to avoid mobile-only layout/loading failures.
-- WebGL errors/context loss are handled without trapping the UI behind the preloader.
+## Run locally
 
-## Run
-Use VS Code Live Server or any static HTTP server. Do not open with `file://`.
+### Live Server
+Open the project folder in VS Code and launch `index.html` with Live Server.
 
-## Controls
-- Drag: rotate specimen
-- Ctrl + wheel: zoom
-- Pinch: zoom
-- Wheel over viewer: research layer
-- Horizontal swipe: previous/next specimen
-- Vertical swipe: research layer
-- Anatomy chips or specimen tap: anatomy scan
-- Auto Rotate / Reset View: camera controls
+### Node server
+```bash
+node server.js
+```
+Then open `http://localhost:10000/`.
 
-## Deployment
-Static client-side site. Models are local GLBs. Three.js and Draco decoder are loaded from jsDelivr, so deployment requires CDN access.
+The server adds long-lived immutable caching for GLB/image assets, HTTP range support, and Brotli/Gzip compression for text assets.
+
+## Render
+Create a **Web Service** using the repository root.
+
+- Runtime: Node
+- Start command: `node server.js`
+- No build command is required.
+
+## Main interactions
+
+- Horizontal swipe / arrow controls / specimen cards: switch insect.
+- Vertical wheel / swipe / arrow keys: move between three research views.
+- Drag: rotate the current 3D specimen.
+- Pinch or Ctrl + wheel: zoom.
+- Click a model region: anatomy detail scan.
+- Auto Rotate and Sound are optional controls.
+
+## Performance strategy
+
+Only the first specimen plus its immediate neighbours are required before the loading screen ends. Additional models are prefetched through the browser cache after the experience becomes interactive. The GLBs stay local; Three.js and the Draco decoder are loaded from CDN.
+
+## Project layout
+
+```text
+index.html
+app.js
+styles.css
+server.js
+package.json
+assets/
+  lab-background.png
+  logo.png
+  cards/*.jpg
+models/
+  ant.glb
+  bee.glb
+  butterfly.glb
+  cockroach.glb
+  dragonfly.glb
+  housefly.glb
+  ladybug.glb
+  mosquito_3d_model_free.glb
+```
