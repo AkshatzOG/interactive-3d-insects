@@ -31,17 +31,16 @@
 <header class="topbar"><div class="brand-lockup"><div class="brand-box"><img src="./assets/favicon.jpg" alt="Void Vipers"></div><div><div class="brand-title">GENESIS LAB <i>/</i> VOID VIPERS</div><div class="brand-sub">FIELD STUDY // DIGITAL INSECTA</div></div></div></header>
 <main id="experience" class="experience"><section id="viewer" class="viewer" aria-label="Interactive 3D insect specimen viewer">
   <div class="stage-hud top-left"><strong id="specimenNo">01</strong><small>/ 08</small></div>
-  <button class="research-toggle" id="researchToggle" type="button"><small id="researchStep">01</small><span>RESEARCH VIEW</span></button>
+  <button class="research-toggle" id="researchToggle" type="button"><small id="researchStep">01 / 04</small><span>RESEARCH VIEW</span><em>CLICK TO EXPLORE</em></button>
   <div class="stage-title-block"><span class="kicker" id="taxKicker"></span><h1 id="specimenTitle">Butterfly</h1><p id="specimenLatin">Danaus plexippus</p></div>
-  <div class="scan-prompt"><span class="pulse"></span>TOUCH SPECIMEN TO SCAN</div>
   <button class="arrow prev-arrow" id="prevBtn" aria-label="Previous insect">←</button><button class="arrow next-arrow" id="nextBtn" aria-label="Next insect">→</button>
   <canvas id="mainCanvas"></canvas>
   <div class="profile" id="profile"><div class="profile-head"><span>FIELD DATA</span><button id="expandBtn" type="button">DETAILS +</button></div><div class="profile-main"><div><small>ORDER</small><strong id="order"></strong></div><div><small>FAMILY</small><strong id="family"></strong></div><div><small>RANGE</small><strong id="range"></strong></div><div><small>ROLE</small><strong id="role"></strong></div></div></div>
   <div class="info-panel" id="infoPanel" data-open="0"><div class="info-head"><span>SPECIMEN DETAILS</span><button id="closeInfo" type="button" aria-label="Close details">×</button></div><h2 id="infoTitle"></h2><p id="infoText"></p><p class="info-note" id="infoNote"></p><div class="info-grid"><div><span>DIET</span><b id="infoDiet"></b></div><div><span>SIZE</span><b id="infoSize"></b></div><div><span>LIFESPAN</span><b id="infoLife"></b></div></div></div>
   <div class="detail-hud" id="detailHud" data-open="0"><div class="detail-head"><span>ANATOMY SCAN</span><button id="closeDetail" aria-label="Close anatomy detail">×</button></div><h2 id="detailTitle">Wing Surface</h2><p id="detailText"></p><div class="detail-meta"><span id="detailMeta">FLIGHT SURFACE</span><span>LIVE</span></div></div>
   <div class="research-strip" id="researchStrip"><strong id="researchTitle">WHOLE SPECIMEN</strong><span id="researchSub">Full specimen · default presentation</span></div>
-  <div class="card-carousel" id="cardCarousel"><div class="cards" id="cards"></div><div class="card-help"><span id="stageHint">01 / 08</span></div></div>
+  <div class="card-carousel" id="cardCarousel"><div class="cards" id="cards"></div></div>
   <div class="bottom-controls"><button id="autoBtn">AUTO ROTATE <span>ON</span></button><button id="resetBtn">RESET VIEW</button><button id="soundBtn">SOUND OFF</button></div>
 </section></main>
-<script type="module" src="./app.js?v=14.2.0"></script>
+<script type="module" src="./app.js?v=15.0.0"></script>
 </body></html>

@@ -1,8 +1,8 @@
-# INSECTA — Genesis Lab V14
+# INSECTA — Genesis Lab / Void Vipers
 
-Final single-page interactive 3D insect archive for Void Vipers / Genesis Lab.
+V15 stability and UX build. Static Three.js insect archive served by `server.js`.
 
-## Run locally
+## Run
 
 ```bash
 npm start
@@ -10,18 +10,20 @@ npm start
 
 Open `http://localhost:10000/`.
 
-## Main interactions
-- Left/right center arrows or horizontal swipe: change specimen.
-- Circular specimen roster: continuous loop; active card renders the real local GLB.
-- Top-right Research View button: cycles 01 → 02 → 03 → 04 → 01.
-- Mouse wheel / vertical swipe over the stage: move through research views.
-- Drag: rotate the specimen and its floating pedestal together.
-- Anatomy scan: click a model region in the default view.
-- Details+: opens the full specimen information panel.
-- Auto Rotate, Reset View and Sound controls are grouped vertically at lower-right.
+## Interaction
 
-## Performance
-The primary model and immediate neighbours are preloaded before the landing UI is revealed. Remaining GLBs are cached in the background. The circular roster uses lightweight image cards rather than rendering all 8 GLBs simultaneously.
+- Drag the specimen to rotate. Vertical rotation is intentionally constrained for a stable specimen-view UX.
+- Mouse wheel controls normal zoom.
+- Vertical touch swipe cycles Research Views 01–04.
+- Horizontal touch swipe changes specimen.
+- Click/tap the specimen to open anatomy details.
+- Click the top-right Research View control to cycle 01 / 04 → 02 / 04 → 03 / 04 → 04 / 04 → 01 / 04.
+- Click a specimen card to switch directly. The circular roster loops continuously across all eight insects.
 
-## Deployment
-The included `server.js` provides HTTP range support, ETags and long-lived caching for GLB/image assets, plus compression for text assets. Render can use `node server.js` as the start command.
+## Assets
+
+Eight local Draco-compressed GLB models are stored in `models/`. The supplied laboratory background, favicon and lightweight specimen-card images are in `assets/`.
+
+## Notes
+
+The active specimen and floating pedestal are one Three.js rig, so they move together during rotation, zoom and research transitions. Models are normalized to remain visually contained on the display disk while occupying the central viewport.
