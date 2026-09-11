@@ -1,3 +1,52 @@
+
+// Audio Synthesizer (Web Audio API)
+let audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx){
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if(AudioContext) audioCtx = new AudioContext();
+  }
+  if(audioCtx && audioCtx.state === 'suspended'){
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+function playUiSound(type='click'){
+  try {
+    const ctx = getAudioCtx();
+    if(!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    const now = ctx.currentTime;
+    if(type === 'click'){
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, now);
+      osc.frequency.exponentialRampToValueAtTime(400, now + 0.05);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      osc.start(now); osc.stop(now + 0.05);
+    } else if(type === 'swipe'){
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(300, now);
+      osc.frequency.exponentialRampToValueAtTime(600, now + 0.12);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      osc.start(now); osc.stop(now + 0.12);
+    } else if(type === 'pin'){
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(520, now);
+      osc.frequency.exponentialRampToValueAtTime(1040, now + 0.18);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      osc.start(now); osc.stop(now + 0.18);
+    }
+  } catch(e){}
+}
+
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js";
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/loaders/DRACOLoader.js";
@@ -90,7 +139,14 @@ function initScene(){
  const fill=new THREE.PointLight(0x72cfff,7.5,7,2); fill.position.set(-2.8,1.5,2.5); scene.add(fill);
  const warm=new THREE.PointLight(0xffd7a4,2.4,6,2); warm.position.set(2.8,.9,1.8); scene.add(warm);
  const rim=new THREE.PointLight(0x2bbcff,5.5,8,2); rim.position.set(0,2.4,-2.8); scene.add(rim);
- const floor=new THREE.Mesh(new THREE.CircleGeometry(1.55,64),new THREE.MeshBasicMaterial({color:0x59dfff,transparent:true,opacity:.025,side:THREE.DoubleSide})); floor.rotation.x=-Math.PI/2; floor.position.y=-1.02; floor.scale.set(1.7,.65,1); scene.add(floor);
+ const texLoader=new THREE.TextureLoader();
+const logoMat=new THREE.MeshStandardMaterial({color:0xffffff,metalness:0.3,roughness:0.3});
+texLoader.load('assets/logo.png',tex=>{tex.colorSpace=THREE.SRGBColorSpace;logoMat.map=tex;logoMat.needsUpdate=true;});
+const sideMat=new THREE.MeshStandardMaterial({color:0x0b2238,metalness:0.8,roughness:0.2});
+const baseMesh=new THREE.Mesh(new THREE.CylinderGeometry(1.85,2.0,0.12,64),[sideMat,logoMat,sideMat]);
+baseMesh.position.y=-1.12; baseMesh.receiveShadow=true; scene.add(baseMesh);
+const ringMesh=new THREE.Mesh(new THREE.TorusGeometry(1.88,0.02,16,100),new THREE.MeshBasicMaterial({color:0x69d9ff}));
+ringMesh.rotation.x=Math.PI/2; ringMesh.position.y=-1.06; scene.add(ringMesh);
  controls=new OrbitControls(camera,renderer.domElement);
  controls.enableDamping=true; controls.dampingFactor=.08; controls.enablePan=false; controls.enableZoom=true;
  controls.minDistance=2.25; controls.maxDistance=5.25;
@@ -109,8 +165,8 @@ function resize(){if(!camera||!renderer)return;const w=Math.max(1,ui.canvas.clie
 
 function normalizeModel(g){
  const box=new THREE.Box3().setFromObject(g), size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
- const maxDim=Math.max(size.x,size.y,size.z)||1; const s=2.02/maxDim;
- g.scale.setScalar(s); g.position.sub(center.multiplyScalar(s)); g.position.y-=.18;
+ const maxDim=Math.max(size.x,size.y,size.z)||1; const s=3.35/maxDim;
+ g.scale.setScalar(s); g.position.sub(center.multiplyScalar(s)); g.position.y-=.05;
  g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;o.frustumCulled=true;o.userData.originalMaterial=o.material;}});
 }
 function attachAnatomyHooks(g,d){
@@ -169,17 +225,57 @@ function prepareModel(g,d){
 function setAnatomyNodes(g,d){
  anatomyNodes.splice(0,anatomyNodes.length);
  const box=new THREE.Box3().setFromObject(g), c=box.getCenter(new THREE.Vector3()), s=box.getSize(new THREE.Vector3());
- const winged=['butterfly','bee','dragonfly','ladybug','housefly','cockroach','mosquito'].includes(d.key);
- const points=winged ? [
-   new THREE.Vector3(c.x,c.y+s.y*.26,c.z+.03),
-   new THREE.Vector3(c.x-s.x*.34,c.y+s.y*.04,c.z+.02),
-   new THREE.Vector3(c.x+s.x*.28,c.y-s.y*.22,c.z+.02)
- ] : [
-   new THREE.Vector3(c.x,c.y+s.y*.28,c.z+.03),
-   new THREE.Vector3(c.x-s.x*.24,c.y,c.z+.02),
-   new THREE.Vector3(c.x+s.x*.25,c.y-s.y*.22,c.z+.02)
+ const points=[
+   new THREE.Vector3(c.x, c.y + s.y*0.35, c.z + s.z*0.15),
+   new THREE.Vector3(c.x - s.x*0.35, c.y + s.y*0.05, c.z + s.z*0.1),
+   new THREE.Vector3(c.x + s.x*0.25, c.y - s.y*0.35, c.z + s.z*0.1)
  ];
- points.forEach((p,i)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.075,12,8),new THREE.MeshBasicMaterial({color:0x69ddff,transparent:true,opacity:.18,depthWrite:false}));m.position.copy(p);m.userData.anatomyIndex=i;m.userData.part=d.anatomy[i];m.userData.isAnatomyNode=true;m.visible=false;scene.add(m);anatomyNodes.push(m);});
+ points.forEach((p,i)=>{
+   const m=new THREE.Mesh(new THREE.SphereGeometry(.06,12,8),new THREE.MeshBasicMaterial({color:0x69d9ff,transparent:true,opacity:.3,depthWrite:false}));
+   m.position.copy(p); m.userData.anatomyIndex=i; m.userData.part=d.anatomy[i]; m.userData.isAnatomyNode=true; m.visible=true;
+   scene.add(m); anatomyNodes.push(m);
+ });
+ updatePinDOMNodes();
+}
+
+function updatePinDOMNodes(){
+ let container=document.getElementById("anatomyPinsContainer");
+ if(!container){
+   container=document.createElement("div");
+   container.id="anatomyPinsContainer";
+   container.className="anatomy-pins-container";
+   $("viewer").appendChild(container);
+ }
+ container.innerHTML="";
+ const d=DATA[currentIndex];
+ d.anatomy.forEach((part, i)=>{
+   const pin=document.createElement("button");
+   pin.className="anatomy-pin pin-" + i;
+   pin.dataset.index=i;
+   pin.innerHTML="<div class="pin-dot"></div><div class="pin-card"><span class="pin-tag">" + part[2] + "</span><strong>" + part[0] + "</strong><p>" + part[1] + "</p></div>";
+   pin.addEventListener("click",(e)=>{ e.stopPropagation(); playUiSound('pin'); scanAnatomy(i); });
+   container.appendChild(pin);
+ });
+}
+
+function updatePinPositions(){
+ if(!camera || !anatomyNodes.length) return;
+ const container=document.getElementById("anatomyPinsContainer");
+ if(!container) return;
+ const pins=container.querySelectorAll(".anatomy-pin");
+ const w=ui.canvas.clientWidth, h=ui.canvas.clientHeight;
+ const projVec=new THREE.Vector3();
+ anatomyNodes.forEach((node, i)=>{
+   if(!pins[i]) return;
+   node.getWorldPosition(projVec);
+   projVec.project(camera);
+   const x=(projVec.x * .5 + .5) * w;
+   const y=(-projVec.y * .5 + .5) * h;
+   const isBehind = projVec.z > 1;
+   pins[i].style.transform = "translate3d(" + x + "px, " + y + "px, 0)";
+   pins[i].style.opacity = isBehind ? "0" : "1";
+   pins[i].style.pointerEvents = isBehind ? "none" : "auto";
+ });
 }
 
 function clearModel(){
@@ -273,15 +369,17 @@ function setResearchPhase(next,announce=true){
  const d=DATA[currentIndex];
  const states=[
   ['01','SPECIMEN IN FOCUS','Primary 3D specimen // observe surface, motion and silhouette.','OBSERVATION 01','Specimen in focus',d.summary],
-  ['02','ANATOMY REVEALED','Body regions are mapped to the specimen and can be inspected directly.','ANATOMY 02','Anatomy revealed',d.anatomy[1][1]],
+  ['02','MACRO CLOSE-UP','Inspecting anatomical structures & fine surface detail.','MACRO 02','Macro close-up',d.anatomy[0][1]],
   ['03','ECOLOGICAL IMPACT','Field note // connect this specimen to the ecosystem around it.','FIELD NOTE 03','Ecological impact',d.note]
  ];
  const state=states[researchPhase];
- stage.textContent=state[0];title.textContent=state[1];sub.textContent=state[2];
+ if(stage) stage.textContent=state[0];
+ if(title) title.textContent=state[1];
+ if(sub) sub.textContent=state[2];
  document.documentElement.style.setProperty('--research-progress',String(researchPhase/2));
- targetCameraZ=researchPhase===1?3.65:researchPhase===2?4.85:4.45;
- targetCameraY=researchPhase===1?.18:researchPhase===2?.38:.28;
- targetTargetY=researchPhase===1?.05:researchPhase===2?.10:.03;
+ targetCameraZ=researchPhase===1?2.45:researchPhase===2?4.25:3.85;
+ targetCameraY=researchPhase===1?.08:researchPhase===2?.28:.18;
+ targetTargetY=researchPhase===1?.15:researchPhase===2?.08:.03;
  cameraTween=1;
  root.classList.remove('research-shift'); void root.offsetWidth; root.classList.add('research-shift');
  if(announce){const obs=document.querySelector('.research-observer'); if(obs){obs.classList.add('show'); clearTimeout(window.__researchObserverTimer); window.__researchObserverTimer=setTimeout(()=>obs.classList.remove('show'),1800);}}
@@ -293,17 +391,17 @@ function bindSwipe(){
    if(performance.now()<researchWheelLock)return;
    if(Math.abs(e.deltaY)<Math.abs(e.deltaX)||Math.abs(e.deltaY)<12)return;
    e.preventDefault(); e.stopPropagation(); researchWheelLock=performance.now()+520;
-   setResearchPhase(researchPhase+(e.deltaY>0?1:-1));
+   playUiSound('swipe'); setResearchPhase(researchPhase+(e.deltaY>0?1:-1));
  },{passive:false,capture:true});
  el.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=performance.now();},{passive:true});
  el.addEventListener('touchend',e=>{if(!sx)return;const t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy,dur=performance.now()-st;sx=0;
-   if(dur<900&&Math.max(Math.abs(dx),Math.abs(dy))>48){if(Math.abs(dx)>Math.abs(dy)*1.18){showSpecimen(currentIndex+(dx<0?1:-1));}else if(Math.abs(dy)>Math.abs(dx)*1.12){setResearchPhase(researchPhase+(dy>0?1:-1));}}
+   if(dur<900&&Math.max(Math.abs(dx),Math.abs(dy))>48){if(Math.abs(dx)>Math.abs(dy)*1.18){showSpecimen(currentIndex+(dx<0?1:-1));}else if(Math.abs(dy)>Math.abs(dx)*1.12){playUiSound('swipe'); setResearchPhase(researchPhase+(dy>0?1:-1));}}
  },{passive:true});
  setResearchPhase(0,false); const obs=document.querySelector('.research-observer'); if(obs){obs.classList.add('show'); setTimeout(()=>obs.classList.remove('show'),2200);}
 }
 function buildList(){DATA.forEach((d,i)=>{const row=document.createElement('button');row.className='specimen-item';row.innerHTML=`<span class="specimen-num">${String(i+1).padStart(2,'0')}</span><span><b class="specimen-name">${d.name}</b><em class="specimen-latin">${d.latin}</em></span><span class="specimen-dot">${iconFor(d.key)}</span>`;row.addEventListener('click',()=>showSpecimen(i));ui.list.appendChild(row);});}
 function bindUI(){
- $('prevBtn').addEventListener('click',()=>showSpecimen(currentIndex-1));$('nextBtn').addEventListener('click',()=>showSpecimen(currentIndex+1));
+ $('prevBtn').addEventListener('click',()=>playUiSound('click'); showSpecimen(currentIndex-1));$('nextBtn').addEventListener('click',()=>playUiSound('click'); showSpecimen(currentIndex+1));
  $('resetBtn').addEventListener('click',()=>{camera.position.set(0,.28,4.45);targetCameraZ=4.45;targetCameraY=.28;targetTargetY=.03;cameraTween=0;controls.target.set(0,.03,0);controls.update();});
  $('autoRotateBtn').addEventListener('click',e=>{autoRotate=!autoRotate;e.currentTarget.classList.toggle('on',autoRotate);e.currentTarget.querySelector('span').textContent=autoRotate?'ON':'OFF';});
  $('detailsBtn').addEventListener('click',()=>{ui.profile.classList.toggle('expanded');$('detailsBtn').textContent=ui.profile.classList.contains('expanded')?'COLLAPSE −':'EXPAND +';});
@@ -311,7 +409,7 @@ function bindUI(){
  document.querySelectorAll('.anatomy-chip').forEach((b,i)=>b.addEventListener('click',()=>scanAnatomy(i)));
  $('drawerClose').addEventListener('click',()=>ui.drawer.classList.remove('open'));
  document.querySelectorAll('.principle').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.principle').forEach(x=>x.classList.remove('active'));b.classList.add('active');const mode=b.dataset.mode;if(mode==='observe')ui.drawer.classList.remove('open');if(mode==='learn'){ui.drawerTitle.textContent='Decode the specimen';ui.drawerBody.innerHTML=`<strong>${DATA[currentIndex].name}</strong><br><br>${DATA[currentIndex].summary}<br><br>Rotate, pinch to zoom, swipe to change specimens, then touch an anatomical region for a live scan.`;ui.drawer.classList.add('open');}if(mode==='protect'){ui.drawerTitle.textContent='Tiny life. Big systems.';ui.drawerBody.innerHTML=`<strong>Why insects matter</strong><br><br>${DATA[currentIndex].note}<br><br>Every specimen in this catalogue represents a small component of a much larger ecological network.`;ui.drawer.classList.add('open');}}));
- window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')showSpecimen(currentIndex-1);if(e.key==='ArrowRight')showSpecimen(currentIndex+1);if(e.key==='Escape')ui.scan.classList.remove('open');});
+ window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')playUiSound('click'); showSpecimen(currentIndex-1);if(e.key==='ArrowRight')playUiSound('click'); showSpecimen(currentIndex+1);if(e.key==='Escape')ui.scan.classList.remove('open');});
 }
 
 async function showSpecimen(i){
@@ -328,7 +426,7 @@ function render(){requestAnimationFrame(render);const dt=Math.min(clock.getDelta
  if(specimenGroup && wingAnimTargets.length){
    wingAnimTargets.forEach(w=>{w.object.rotation.z=w.base.z+Math.sin(t*.018+w.phase)*w.amp; w.object.rotation.y=w.base.y+Math.cos(t*.014+w.phase)*w.amp*.16;});
  }
- ghostViewers.forEach(g=>g.render(t));if(controls)controls.update();if(renderer&&!rendererFailed)renderer.render(scene,camera);}
+ updatePinPositions();ghostViewers.forEach(g=>g.render(t));if(controls)controls.update();if(renderer&&!rendererFailed)renderer.render(scene,camera);}
 
 async function preloadAllBackground(){
  const queue=DATA.filter(d=>!modelCache.has(d.key)); let cursor=0;
