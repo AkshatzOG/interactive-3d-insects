@@ -187,3 +187,12 @@ Before redistributing any third-party asset outside this project, verify the ori
 This is a static interactive 3D web project created as a college web-development showcase and portfolio project.
 
 The application does not require authentication, a database, or server-side application logic beyond static asset delivery.
+
+## v15.2 Final Mobile / Glass Pass
+
+- Mobile layout preserves the existing specimen, pedestal/disc, and specimen-card roster sizing.
+- Research View, Field Data / Details, and right-side control buttons are compressed for portrait screens to prevent collisions.
+- Glass panels use a readable bluish translucent treatment without luminous card glow.
+- Previous/next controls use the supplied Material-style chevron SVG assets.
+- Horizontal manual drag subtly pans the laboratory environment independently of the 3D specimen, giving mobile users a wider environmental viewing effect while retaining the specimen interaction.
+- The site remains a single fixed viewport with touch-safe gestures and no document scrolling.
