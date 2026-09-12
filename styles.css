@@ -21,8 +21,8 @@
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 
 /* v15.2 final responsive/mobile polish */
-:root{--bg-pan:0px;--bg-zoom:1}
-.lab-bg{background-position:calc(50% + var(--bg-pan)) center;background-size:cover;transform:scale(var(--bg-zoom));transform-origin:center center;transition:background-position .16s ease-out}
+:root{--bg-zoom:1}
+.lab-bg{background-position:center center;background-size:cover;transform:scale(var(--bg-zoom));transform-origin:center center;transition:none}
 /* Premium glass: readable, bluish, no luminous/glow card treatment. */
 .research-toggle,.profile,.info-panel,.detail-hud,.bottom-controls button{
   background:linear-gradient(135deg,rgba(8,25,36,.78),rgba(3,13,21,.86));
@@ -63,11 +63,14 @@
   .arrow img{width:22px;height:22px}
   .prev-arrow{left:8px}.next-arrow{right:8px}
 
-  /* Keep the specimen/disc/roster sizing. Only compress the information controls around them. */
+  /* Compact mobile field-data trigger; the full card opens only when requested. */
+  .mobile-info-trigger{display:flex;align-items:center;justify-content:space-between;position:absolute;z-index:93;left:12px;bottom:calc(25% - 2px);width:116px;height:32px;padding:0 10px;border:1px solid rgba(123,209,234,.32);border-radius:10px;background:linear-gradient(135deg,rgba(8,25,36,.84),rgba(3,13,21,.92));color:#cde6ec;font:500 6px 'IBM Plex Mono';letter-spacing:.12em;cursor:pointer;backdrop-filter:blur(10px);box-shadow:0 10px 22px rgba(0,0,0,.26)}
+  .mobile-info-trigger span{color:var(--cyan);font-size:11px;line-height:1}
   .profile{
-    left:12px;bottom:25%;width:calc(100vw - 118px);max-width:250px;
-    padding:10px 12px;border-radius:15px;
+    left:12px;bottom:calc(25% + 40px);width:min(248px,calc(100vw - 118px));max-width:248px;
+    padding:10px 12px;border-radius:15px;opacity:0;transform:translateY(8px);pointer-events:none;transition:.22s ease;
   }
+  .profile[data-mobile-open="1"]{opacity:1;transform:none;pointer-events:auto}
   .profile-head{margin-bottom:9px}
   .profile-head span{font-size:7px;letter-spacing:.15em}
   .profile-head button{font-size:6.5px;letter-spacing:.10em}
@@ -76,9 +79,10 @@
   .profile-main strong{font-size:10px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   .info-panel{
-    left:12px;right:12px;bottom:22%;width:auto;max-height:46svh;overflow:auto;
-    padding:13px 14px;border-radius:15px;
+    left:50%;right:auto;bottom:calc(25% + 8px);width:min(290px,calc(100vw - 24px));max-height:42svh;overflow:auto;
+    padding:13px 14px;border-radius:15px;transform:translate(-50%,10px);
   }
+  .info-panel[data-open="1"]{transform:translate(-50%,0)}
   .info-panel h2{font-size:16px;margin:9px 0 6px}
   .info-panel p{font-size:11px;line-height:1.45}
   .info-note{margin-top:7px!important}
@@ -109,9 +113,10 @@
   .specimen-card{width:86px;height:114px;bottom:12px}
 
   /* Background orbit: hand-drag the environment left/right without moving the specimen. */
-  .lab-bg{background-size:auto 100%;background-repeat:no-repeat;transition:none}
+  .lab-bg{background-position:center center;background-size:cover;background-repeat:no-repeat;transform:scale(1);}
 }
 @media(max-width:430px){
+  .mobile-info-trigger{left:9px;width:108px;height:30px;padding-inline:9px;font-size:5.5px}
   .research-toggle{width:118px}
   .stage-hud{font-size:9px}
   .profile{width:calc(100vw - 126px);padding:9px 10px}
@@ -120,6 +125,7 @@
   .detail-hud{width:calc(44vw);right:9px}
 }
 @media(max-width:360px){
+  .mobile-info-trigger{left:8px;width:102px;height:29px;font-size:5.2px}
   .research-toggle{right:8px;width:108px}
   .research-toggle span{font-size:6.5px}
   .stage-title-block{top:19.5%}
@@ -129,3 +135,6 @@
   .arrow{width:38px;height:54px}
   .arrow img{width:20px;height:20px}
 }
+
+.mobile-info-trigger{display:none}
+@media(max-width:820px){.mobile-info-trigger{display:flex}}
