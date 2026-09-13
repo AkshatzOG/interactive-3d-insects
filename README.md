@@ -1,3 +1,7 @@
+# INSECTA v15.3.1
+
+Performance/stability refinement of v15.3. This release keeps the specimen roster but reduces card footprint to ~50% of the previous size, moves the opened specimen-details panel to a centered safe zone so it cannot sit behind the navigation arrows, and standardizes bluish glassmorphism without luminous card glow.
+
 # INSECTA — Genesis Lab / Void Vipers
 
 An interactive 3D insect specimen archive built as a client-side web experience with **Three.js**. The project presents eight locally hosted insect models inside a cinematic digital laboratory, combining 3D specimen inspection, research-view transitions, anatomy interaction, a looping specimen carousel, responsive touch gestures, and optimized asset delivery.
