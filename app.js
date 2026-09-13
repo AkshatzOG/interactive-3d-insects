@@ -1,9 +1,11 @@
-/* INSECTA V15.2 FINAL — mobile/glass/environment interaction pass */
+/* INSECTA V15.4 PERFORMANCE FINAL — mobile/glass/environment interaction pass */
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/loaders/DRACOLoader.js';
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/controls/OrbitControls.js';
 import * as SkeletonUtils from 'https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/utils/SkeletonUtils.js';
+
+THREE.Cache.enabled=true;
 
 const DATA = [
  {key:'butterfly',name:'Butterfly',latin:'Danaus plexippus',order:'Lepidoptera',family:'Nymphalidae',range:'Worldwide',role:'Pollinator',diet:'Nectar',size:'8.5–10.5 cm',life:'2–6 weeks adult',color:0xffa63d,card:'butterfly.jpg',summary:'A pollinator whose wing scales create visual signalling, camouflage and thermoregulation.',note:'Pollination, food webs and seasonal migration make butterflies valuable ecological indicators.',anatomy:[['HEAD + ANTENNAE','Sensory antennae and compound eyes orient the butterfly toward odours, movement and light.','SENSORY SYSTEM'],['WING SURFACE','Microscopic wing scales scatter light and contribute to colour, signalling and camouflage.','FLIGHT SURFACE'],['THORAX + ABDOMEN','Flight muscles sit in the thorax while the abdomen contains major digestive and reproductive organs.','CORE BODY']]},
@@ -13,7 +15,6 @@ const DATA = [
  {key:'ladybug',name:'Ladybird',latin:'Coccinella septempunctata',order:'Coleoptera',family:'Coccinellidae',range:'Northern Hemisphere',role:'Biocontrol',diet:'Aphids',size:'5–8 mm',life:'1 year',color:0xe14f48,card:'ladybug.jpg',summary:'A compact beetle whose warning colours advertise chemical defences to predators.',note:'Ladybirds help regulate aphid populations and can protect crops naturally.',anatomy:[['HEAD + ANTENNAE','The small head carries compound eyes and short antennae that help locate prey and environmental cues.','SENSORY SYSTEM'],['ELYTRA + WINGS','The coloured wing covers protect folded flight wings beneath the hard beetle shell.','ARMOUR + FLIGHT'],['ABDOMEN + DEFENCE','The abdomen is protected by the elytra and can support chemical defence responses when threatened.','DEFENCE SYSTEM']]},
  {key:'housefly',name:'House Fly',latin:'Musca domestica',order:'Diptera',family:'Muscidae',range:'Worldwide',role:'Decomposer',diet:'Liquids / decaying matter',size:'6–7 mm',life:'15–30 days',color:0x9fb7be,card:'housefly.jpg',summary:'A rapid-lifecycle decomposer with halteres that stabilise flight and compound eyes for motion detection.',note:'Flies recycle organic matter and transfer nutrients through food webs.',anatomy:[['HEAD + COMPOUND EYES','Large compound eyes detect rapid changes in the visual field while antennae and mouthparts sample the environment.','SENSORY SYSTEM'],['WING + HALTERE','One functional wing pair drives flight; tiny halteres act as gyroscopic sensors for balance.','FLIGHT CONTROL'],['ABDOMEN','The segmented abdomen contains digestive and reproductive organs and supports the fly’s rapid lifecycle.','CORE BODY']]},
  {key:'cockroach',name:'Cockroach',latin:'Periplaneta americana',order:'Blattodea',family:'Blattidae',range:'Worldwide',role:'Decomposer',diet:'Omnivorous',size:'34–53 mm',life:'1–2 years',color:0x9a704e,card:'cockroach.jpg',summary:'A resilient detritivore built around a flexible exoskeleton, sensitive antennae and rapid locomotion.',note:'Cockroaches are resilient detritivores that participate in nutrient cycling.',anatomy:[['HEAD + ANTENNAE','Long antennae continuously sample chemical and tactile information around the animal.','SENSORY SYSTEM'],['THORAX + LEGS','The thorax anchors six powerful legs built for fast, low-profile movement across uneven surfaces.','LOCOMOTION'],['ABDOMEN + WINGS','The segmented abdomen protects internal organs; adult cockroaches may use their wings during movement.','CORE + FLIGHT']]},
- {key:'mosquito',name:'Mosquito',latin:'Aedes aegypti',order:'Diptera',family:'Culicidae',range:'Tropical + subtropical',role:'Pollinator / vector',diet:'Nectar / blood (female)',size:'3–6 mm',life:'~2–4 weeks',color:0x7182b6,card:'mosquito.jpg',summary:'A lightweight dipteran with a specialised proboscis and sensory antennae tuned to chemical cues.',note:'Mosquitoes occupy aquatic and terrestrial food webs; some species are important disease vectors.',anatomy:[['HEAD + ANTENNAE','Antennae and sensory palps detect odours, carbon dioxide and other cues that help locate hosts.','SENSORY SYSTEM'],['PROBOSCIS','The elongated mouthpart is specialised for piercing and feeding; females can take blood meals.','FEEDING SYSTEM'],['WINGS + ABDOMEN','A single wing pair provides flight while the abdomen expands to accommodate a blood meal and eggs.','FLIGHT + CORE']]}
 ];
 
 const $=id=>document.getElementById(id);
@@ -49,16 +50,15 @@ const FOCUS={
  dragonfly:[[-.50,.70],[.08,.48],[.12,.64]],
  ladybug:[[-.38,.67],[0,.46],[.04,.62]],
  housefly:[[-.43,.70],[0,.48],[.06,.72]],
- cockroach:[[-.46,.70],[.06,.44],[.10,.68]],
- mosquito:[[-.48,.71],[.08,.45],[.10,.67]]
+ cockroach:[[-.46,.70],[.06,.44],[.10,.68]]
 };
 function setLoad(p,text){ui.loadPct.textContent=p+'%';ui.loadStage.textContent=text;ui.loadBar.style.width=p+'%';}
-function pathFor(d){return `./models/${d.key==='mosquito'?'mosquito_3d_model_free':d.key}.glb?v=15.3.0`;}
+function pathFor(d){return `./models/${d.key}.glb?v=15.4.0`;}
 function cloneScene(src){return SkeletonUtils.clone(src);}
-function resize(){if(!renderer||!camera||!ui.canvas)return;const r=ui.canvas.parentElement.getBoundingClientRect();camera.aspect=Math.max(1,r.width)/Math.max(1,r.height);camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio||1,matchMedia('(max-width:820px)').matches?1.2:1.45));renderer.setSize(r.width,r.height,false);}
+function resize(){if(!renderer||!camera||!ui.canvas)return;const r=ui.canvas.parentElement.getBoundingClientRect();camera.aspect=Math.max(1,r.width)/Math.max(1,r.height);camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio||1,matchMedia('(max-width:820px)').matches?1.05:1.35));renderer.setSize(r.width,r.height,false);}
 function initScene(){
  scene=new THREE.Scene(); camera=new THREE.PerspectiveCamera(30,1,.05,100); camera.position.set(0,.72,5.15);
- renderer=new THREE.WebGLRenderer({canvas:ui.canvas,alpha:true,antialias:true,powerPreference:'high-performance'}); renderer.outputColorSpace=THREE.SRGBColorSpace; renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.28; renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFShadowMap;
+ const compactMode=matchMedia('(max-width:820px)').matches; renderer=new THREE.WebGLRenderer({canvas:ui.canvas,alpha:true,antialias:!compactMode,powerPreference:'high-performance',preserveDrawingBuffer:false}); renderer.outputColorSpace=THREE.SRGBColorSpace; renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.28; renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFShadowMap;
  scene.add(new THREE.HemisphereLight(0xbfe8ff,0x05070b,.95));
  const key=new THREE.DirectionalLight(0xffefd5,3.1); key.position.set(4.5,7,4.8); key.castShadow=true; key.shadow.mapSize.set(2048,2048); key.shadow.camera.near=.2; key.shadow.camera.far=26; key.shadow.camera.left=-6; key.shadow.camera.right=6; key.shadow.camera.top=6; key.shadow.camera.bottom=-6; key.shadow.bias=-.00025; scene.add(key);
  const fill=new THREE.DirectionalLight(0x74dfff,1.15); fill.position.set(-4,2.7,4.2); scene.add(fill);
@@ -69,7 +69,7 @@ function initScene(){
  window.addEventListener('resize',resize,{passive:true}); window.visualViewport?.addEventListener('resize',resize,{passive:true}); resize();
 }
 function tuneMaterials(root){root.traverse(o=>{if(!o.isMesh)return;o.castShadow=true;o.receiveShadow=true;const mats=Array.isArray(o.material)?o.material:[o.material];for(const m of mats){if(!m)continue;if(m.map)m.map.colorSpace=THREE.SRGBColorSpace;if(m.color)m.color.set(0xffffff);if('roughness' in m)m.roughness=Math.max(.26,m.roughness??.5);if('metalness' in m)m.metalness=Math.min(.16,m.metalness??0);m.needsUpdate=true;}});}
-function normalize(root,key){root.position.set(0,0,0);root.rotation.set(0,0,0);root.scale.setScalar(1);const box=new THREE.Box3().setFromObject(root),size=box.getSize(new THREE.Vector3());const target={butterfly:3.0,bee:2.82,ant:2.82,dragonfly:3.05,ladybug:1.96,housefly:2.9,cockroach:2.9,mosquito:1.74}[key]||2.9;const k=target/(Math.max(size.x,size.y,size.z)||1);root.scale.setScalar(k);root.userData.speciesKey=key;return root;}
+function normalize(root,key){root.position.set(0,0,0);root.rotation.set(0,0,0);root.scale.setScalar(1);const box=new THREE.Box3().setFromObject(root),size=box.getSize(new THREE.Vector3());const target={butterfly:3.0,bee:2.82,ant:2.82,dragonfly:3.05,ladybug:1.96,housefly:2.9,cockroach:2.9}[key]||2.9;const k=target/(Math.max(size.x,size.y,size.z)||1);root.scale.setScalar(k);root.userData.speciesKey=key;return root;}
 function safeClips(animations){return (animations||[]).map(c=>{const tracks=(c.tracks||[]).filter(t=>t&&typeof t.createInterpolant==='function'&&t.times?.length&&t.values?.length);return tracks.length?new THREE.AnimationClip(c.name||'specimen',c.duration,tracks):null;}).filter(Boolean);}
 function collectMotionNodes(root,key){const wings=[],legs=[];root.traverse(o=>{const n=(o.name||'').toLowerCase();if(/wing|forewing|hindwing|wingroot|halter|ala/.test(n))wings.push({o,bz:o.rotation.z,bx:o.rotation.x,phase:wings.length*.83}); if(/leg|femur|tibia|tarsus|coxa|mandible|antenna|proboscis/.test(n))legs.push({o,bz:o.rotation.z,bx:o.rotation.x,phase:legs.length*.59});}); return {wings,legs};}
 function setupMotion(root,d){currentMixer=null;const clips=safeClips(root.userData.animations||[]);if(clips.length){try{currentMixer=new THREE.AnimationMixer(root);for(const clip of clips){const action=currentMixer.clipAction(clip);action.reset().play();}}catch(err){console.warn('Animation clips skipped for',d.key,err);currentMixer=null;}}root.userData.motion=collectMotionNodes(root,d.key);}
@@ -84,7 +84,7 @@ function createPedestal(d){const stage=new THREE.Group();stage.name='FloatingSpe
 function fitModelToBase(root){const box=new THREE.Box3().setFromObject(root),size=box.getSize(new THREE.Vector3());const radial=Math.hypot(size.x,size.z)/2;const maxRad=1.50;const maxH=3.05;let s=1;if(radial>maxRad)s=Math.min(s,maxRad/radial);if(size.y*s>maxH)s=Math.min(s,maxH/size.y);root.scale.multiplyScalar(s);return new THREE.Box3().setFromObject(root);}
 function buildFloatingStage(root,d){const rig=new THREE.Group();rig.name='SpecimenRig';const stage=createPedestal(d);stage.position.y=-.42;rig.add(stage);let box=fitModelToBase(root);const top=stage.position.y+.20;root.position.y+=top-box.min.y+.012;root.position.x=0;root.position.z=0;rig.add(root);box=new THREE.Box3().setFromObject(root);rig.userData={stage,model:root,modelBox:box,modelSize:box.getSize(new THREE.Vector3()),speciesKey:d.key};rig.position.y=.09; return rig;}
 function currentRigMotion(t){if(!currentRig||!currentModel)return;const bob=Math.sin(t*.00105)*.010;currentRig.position.y=bob;if(autoRotate)currentRig.rotation.y+=.0015;currentRig.rotation.z=Math.sin(t*.00047)*.0028;const motion=currentModel.userData.motion;if(!motion)return;const key=currentModel.userData.speciesKey;if(currentMixer)return;
- if(motion.wings.length){for(const n of motion.wings){let amp=key==='dragonfly'?.055:key==='butterfly'?.042:key==='bee'?.038:key==='housefly'?.048:key==='mosquito'?.052:.025;n.o.rotation.z=n.bz+Math.sin(t*.0118+n.phase)*amp;n.o.rotation.x=n.bx+Math.cos(t*.0118+n.phase)*amp*.08;}}
+ if(motion.wings.length){for(const n of motion.wings){let amp=key==='dragonfly'?.055:key==='butterfly'?.042:key==='bee'?.038:key==='housefly'?.048:.025;n.o.rotation.z=n.bz+Math.sin(t*.0118+n.phase)*amp;n.o.rotation.x=n.bx+Math.cos(t*.0118+n.phase)*amp*.08;}}
  else if(motion.legs.length){for(const n of motion.legs){const amp=key==='ant'?.018:key==='ladybug'?.012:key==='cockroach'?.014:.010;n.o.rotation.z=n.bz+Math.sin(t*.0055+n.phase)*amp;n.o.rotation.x=n.bx+Math.cos(t*.0055+n.phase)*amp*.35;}}
 }
 async function loadModel(d,critical=false){if(cache.has(d.key))return cloneScene(cache.get(d.key));if(loading.has(d.key))return cloneScene(await loading.get(d.key));const p=new Promise((resolve,reject)=>loader.load(pathFor(d),g=>resolve(g),e=>{if(critical&&e.total){const pct=Math.min(74,16+Math.round(e.loaded/e.total*58));setLoad(pct,`DECODING ${d.name.toUpperCase()}`);}},reject)).then(g=>{g.scene.userData.animations=g.animations||[];tuneMaterials(g.scene);normalize(g.scene,d.key);cache.set(d.key,g.scene);return g.scene;});loading.set(d.key,p);try{return cloneScene(await p);}finally{loading.delete(d.key);}}
@@ -101,12 +101,63 @@ function closeDetail(){ui.detail.dataset.open='0';}
 function openInfo(){const d=DATA[index];ui.infoTitle.textContent=`${d.name} · ${d.latin}`;ui.infoText.textContent=d.summary;ui.infoNote.textContent=d.note;ui.infoDiet.textContent=d.diet;ui.infoSize.textContent=d.size;ui.infoLife.textContent=d.life;ui.infoPanel.dataset.open='1';if(ui.profile)ui.profile.dataset.mobileOpen='0';if(ui.mobileInfoTrigger)ui.mobileInfoTrigger.setAttribute('aria-expanded','false');}
 function closeInfo(){ui.infoPanel.dataset.open='0';}
 function switchTo(next){if(transitionLock)return;const target=(next+CARD_COUNT)%CARD_COUNT;if(target===index)return;transitionLock=true;controls.enabled=false;const old=currentRig;const oldIndex=index;const direction=((target-oldIndex+CARD_COUNT)%CARD_COUNT)<=4?1:-1;const d=DATA[target];closeInfo();closeDetail();audio.beep('switch');
- const revealNew=root=>{setupMotion(root,d);const rig=buildFloatingStage(root,d);rig.position.x=direction*.52;rig.rotation.y=direction*.10;rig.scale.setScalar(.96);scene.add(rig);currentRig=rig;currentModel=root;index=target;research=0;updateUI(d);positionCards();applyResearch(false);const enterStart=performance.now();function reveal(){const p=Math.min(1,(performance.now()-enterStart)/360),e=1-Math.pow(1-p,3);if(currentRig!==rig)return;rig.position.x=THREE.MathUtils.lerp(direction*.52,0,e);rig.rotation.y=THREE.MathUtils.lerp(direction*.10,0,e);rig.scale.setScalar(THREE.MathUtils.lerp(.96,1,e));if(p<1)requestAnimationFrame(reveal);else{transitionLock=false;controls.enabled=true;preloadNeighbors();}}requestAnimationFrame(reveal);};
- const beginTransition=root=>{const oldExitStart=performance.now(),oldX=old?.position.x||0,oldR=old?.rotation.y||0,oldS=old?.scale.x||1;function exit(){const p=Math.min(1,(performance.now()-oldExitStart)/210),e=1-Math.pow(1-p,3);if(old){old.position.x=THREE.MathUtils.lerp(oldX,-direction*.52,e);old.rotation.y=THREE.MathUtils.lerp(oldR,-direction*.08,e);old.scale.setScalar(THREE.MathUtils.lerp(oldS,.94,e));}if(p<1)requestAnimationFrame(exit);else{if(old)scene.remove(old);currentRig=null;currentModel=null;revealNew(root);}}requestAnimationFrame(exit);};
+ const revealNew=root=>{setupMotion(root,d);const rig=buildFloatingStage(root,d);rig.position.x=direction*.52;rig.rotation.y=direction*.10;rig.scale.setScalar(.96);scene.add(rig);currentRig=rig;currentModel=root;index=target;research=0;updateUI(d);positionCards();applyResearch(false);const enterStart=performance.now();function reveal(){const p=Math.min(1,(performance.now()-enterStart)/280),e=1-Math.pow(1-p,3);if(currentRig!==rig)return;rig.position.x=THREE.MathUtils.lerp(direction*.52,0,e);rig.rotation.y=THREE.MathUtils.lerp(direction*.10,0,e);rig.scale.setScalar(THREE.MathUtils.lerp(.96,1,e));if(p<1)requestAnimationFrame(reveal);else{transitionLock=false;controls.enabled=true;scheduleBackgroundPreload();}}requestAnimationFrame(reveal);};
+ const beginTransition=root=>{const oldExitStart=performance.now(),oldX=old?.position.x||0,oldR=old?.rotation.y||0,oldS=old?.scale.x||1;function exit(){const p=Math.min(1,(performance.now()-oldExitStart)/170),e=1-Math.pow(1-p,3);if(old){old.position.x=THREE.MathUtils.lerp(oldX,-direction*.52,e);old.rotation.y=THREE.MathUtils.lerp(oldR,-direction*.08,e);old.scale.setScalar(THREE.MathUtils.lerp(oldS,.94,e));}if(p<1)requestAnimationFrame(exit);else{if(old)scene.remove(old);currentRig=null;currentModel=null;revealNew(root);}}requestAnimationFrame(exit);};
  if(cache.has(d.key))beginTransition(cloneScene(cache.get(d.key)));else loadModel(d,true).then(beginTransition).catch(err=>{console.error('Specimen load failed',err);transitionLock=false;controls.enabled=true;});}
-function preloadNeighbors(){const ids=[(index+1)%CARD_COUNT,(index+CARD_COUNT-1)%CARD_COUNT,(index+2)%CARD_COUNT,(index+CARD_COUNT-2)%CARD_COUNT];const run=async()=>{for(const id of ids){const d=DATA[id];if(!cache.has(d.key))try{await loadModel(d)}catch(err){console.warn('Preload failed',d.key,err);}}};(window.requestIdleCallback||((fn)=>setTimeout(fn,300)))(run);}
 function inspectHit(e){if(!currentModel||!camera||transitionLock)return;const r=ui.canvas.getBoundingClientRect(),p=new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1),ray=new THREE.Raycaster();ray.setFromCamera(p,camera);const hit=ray.intersectObject(currentModel,true)[0];if(!hit)return;const local=currentModel.worldToLocal(hit.point.clone()),box=new THREE.Box3().setFromObject(currentModel),h=(local.y-box.min.y)/(box.max.y-box.min.y||1);let part=h>.68?0:h<.34?2:1;if(Math.abs(local.x)>Math.max(.45,(box.max.x-box.min.x)*.24))part=1;openDetail(part,true);}
-async function boot(){try{initScene();setLoad(7,'INITIALISING 3D ENGINE');try{sharedLogoTexture=await new THREE.TextureLoader().loadAsync('./assets/logo.png');sharedLogoTexture.colorSpace=THREE.SRGBColorSpace;}catch{}setLoad(12,'PRELOADING PRIMARY SPECIMEN');const primaryPromise=loadModel(DATA[0],true);const neighbors=Promise.all([loadModel(DATA[CARD_COUNT-1]),loadModel(DATA[1])]);const primary=await primaryPromise;await Promise.allSettled([neighbors]);setLoad(82,'BUILDING FLOATING SPECIMEN');setupMotion(primary,DATA[0]);currentModel=primary;currentRig=buildFloatingStage(primary,DATA[0]);scene.add(currentRig);updateUI(DATA[0]);renderCards();applyResearch(false);setLoad(96,'FINAL OPTICAL CALIBRATION');await new Promise(r=>setTimeout(r,130));setLoad(100,'CATALOGUE READY');setTimeout(()=>ui.preloader.classList.add('hidden'),180);preloadNeighbors();animate();}catch(err){console.error('BOOT FAILED',err);setLoad(100,'3D OFFLINE — SHOWING CATALOGUE');ui.preloader.classList.add('hidden');if(!scene){try{initScene();}catch{}}try{renderCards();}catch{}animate();}}
+async function boot(){
+ try{
+  initScene();
+  setLoad(6,'INITIALISING 3D ENGINE');
+  try{sharedLogoTexture=await new THREE.TextureLoader().loadAsync('./assets/logo.png');sharedLogoTexture.colorSpace=THREE.SRGBColorSpace;}catch{}
+  setLoad(10,'PRELOADING PRIMARY SPECIMEN');
+  const primary=await loadModel(DATA[0],true);
+  setLoad(72,'PREPARING PRIMARY SPECIMEN');
+  setupMotion(primary,DATA[0]);
+  currentModel=primary;
+  currentRig=buildFloatingStage(primary,DATA[0]);
+  scene.add(currentRig);
+  updateUI(DATA[0]);
+  renderCards();
+  applyResearch(false);
+  setLoad(92,'WARMING 3D PIPELINE');
+  try{if(renderer.compileAsync)await renderer.compileAsync(scene,camera);else renderer.compile(scene,camera);}catch(err){console.warn('Shader warmup skipped',err);}
+  await new Promise(requestAnimationFrame);
+  setLoad(100,'CATALOGUE LIVE');
+  setTimeout(()=>ui.preloader.classList.add('hidden'),110);
+  animate();
+  // Let the first rendered frame settle before spending CPU on background decoding.
+  scheduleBackgroundPreload();
+ }catch(err){
+  console.error('BOOT FAILED',err);
+  setLoad(100,'3D OFFLINE — SHOWING CATALOGUE');
+  ui.preloader.classList.add('hidden');
+  if(!scene){try{initScene();}catch{}}
+  try{renderCards();}catch{}
+  animate();
+ }
+}
+function scheduleBackgroundPreload(){
+ const idle=window.requestIdleCallback||((fn)=>setTimeout(()=>fn({timeRemaining:()=>8}),450));
+ idle(()=>preloadPriority(),{timeout:1800});
+}
+async function preloadPriority(){
+ const priority=[
+  (index+1)%CARD_COUNT,
+  (index+CARD_COUNT-1)%CARD_COUNT,
+  (index+2)%CARD_COUNT,
+  (index+CARD_COUNT-2)%CARD_COUNT,
+  (index+3)%CARD_COUNT,
+  (index+CARD_COUNT-3)%CARD_COUNT
+ ].filter((v,i,a)=>a.indexOf(v)===i);
+ for(const id of priority){
+  const d=DATA[id];
+  if(cache.has(d.key)) continue;
+  try{await loadModel(d);}
+  catch(err){console.warn('Background preload failed',d.key,err);}
+  await new Promise(r=>setTimeout(r,40));
+ }
+}
 function bind(id,event,handler,options){const el=document.getElementById(id);if(!el)return;el.addEventListener(event,handler,options);}
 function setupEvents(){
  bind('prevBtn','click',()=>switchTo(index-1)); bind('nextBtn','click',()=>switchTo(index+1)); bind('researchToggle','click',()=>stepResearch(1)); bind('expandBtn','click',()=>{openInfo();}); bind('mobileInfoTrigger','click',()=>{const isOpen=ui.profile?.dataset.mobileOpen==='1';if(ui.profile)ui.profile.dataset.mobileOpen=isOpen?'0':'1';if(ui.infoPanel)ui.infoPanel.dataset.open='0';if(ui.mobileInfoTrigger)ui.mobileInfoTrigger.setAttribute('aria-expanded',String(!isOpen));}); bind('closeInfo','click',closeInfo); bind('closeDetail','click',closeDetail);
@@ -119,5 +170,6 @@ function setupEvents(){
  let wheelLock=0;ui.viewer?.addEventListener('wheel',e=>{e.preventDefault();e.stopPropagation();if(Date.now()<wheelLock)return;wheelLock=Date.now()+360; if(e.ctrlKey||e.metaKey){const dir=e.deltaY>0?1:-1;const factor=dir>0?1.10:.91;const offset=camera.position.clone().sub(controls.target);const next=Math.min(6.8,Math.max(1.35,offset.length()*factor));camera.position.copy(controls.target).add(offset.setLength(next));return;}if(Math.abs(e.deltaY)>8)stepResearch(e.deltaY>0?1:-1);},{passive:false,capture:true});
  if(ui.cards){let csx=0;ui.cards.addEventListener('pointerdown',e=>{csx=e.clientX;},{passive:true});ui.cards.addEventListener('pointerup',e=>{const dx=e.clientX-csx;if(Math.abs(dx)>54)switchTo(index+(dx<0?1:-1));},{passive:true});}
 }
-function animate(){requestAnimationFrame(animate);const now=performance.now(),delta=Math.min(.05,(now-lastTime)/1000);lastTime=now;elapsed+=delta;if(currentMixer)currentMixer.update(delta);currentRigMotion(now);if(viewTween){const p=Math.min(1,(now-viewTween.start)/viewTween.duration),e=1-Math.pow(1-p,3);camera.position.lerpVectors(viewTween.fromPos,viewTween.toPos,e);controls.target.lerpVectors(viewTween.fromTarget,viewTween.toTarget,e);if(p>=1){camera.position.copy(viewTween.toPos);controls.target.copy(viewTween.toTarget);viewTween=null;controls.enabled=true;}}controls?.update();if(renderer&&scene&&camera)renderer.render(scene,camera);}
-setupEvents();boot();
+function setupVisibilityPause(){document.addEventListener('visibilitychange',()=>{lastTime=performance.now();});}
+function animate(){requestAnimationFrame(animate);if(document.hidden){lastTime=performance.now();return;}const now=performance.now(),delta=Math.min(.05,(now-lastTime)/1000);lastTime=now;elapsed+=delta;if(currentMixer)currentMixer.update(delta);currentRigMotion(now);if(viewTween){const p=Math.min(1,(now-viewTween.start)/viewTween.duration),e=1-Math.pow(1-p,3);camera.position.lerpVectors(viewTween.fromPos,viewTween.toPos,e);controls.target.lerpVectors(viewTween.fromTarget,viewTween.toTarget,e);if(p>=1){camera.position.copy(viewTween.toPos);controls.target.copy(viewTween.toTarget);viewTween=null;controls.enabled=true;}}controls?.update();if(renderer&&scene&&camera)renderer.render(scene,camera);}
+setupVisibilityPause();setupEvents();boot();

@@ -4,7 +4,7 @@ Performance/stability refinement of v15.3. This release keeps the specimen roste
 
 # INSECTA — Genesis Lab / Void Vipers
 
-An interactive 3D insect specimen archive built as a client-side web experience with **Three.js**. The project presents eight locally hosted insect models inside a cinematic digital laboratory, combining 3D specimen inspection, research-view transitions, anatomy interaction, a looping specimen carousel, responsive touch gestures, and optimized asset delivery.
+An interactive 3D insect specimen archive built as a client-side web experience with **Three.js**. The project presents seven locally hosted insect models inside a cinematic digital laboratory, combining 3D specimen inspection, research-view transitions, anatomy interaction, a looping specimen carousel, responsive touch gestures, and optimized asset delivery.
 
 ## Features
 
@@ -41,7 +41,6 @@ The archive currently contains:
 5. Ladybird
 6. House Fly
 7. Cockroach
-8. Mosquito
 
 ## Technology Stack
 
@@ -79,7 +78,6 @@ INSECTA/
 │       ├── dragonfly.jpg
 │       ├── housefly.jpg
 │       ├── ladybug.jpg
-│       └── mosquito.jpg
 └── models/
     ├── ant.glb
     ├── bee.glb
@@ -88,7 +86,7 @@ INSECTA/
     ├── dragonfly.glb
     ├── housefly.glb
     ├── ladybug.glb
-    └── mosquito_3d_model_free.glb
+    └── cockroach.glb
 ```
 
 ## Local Development
@@ -119,7 +117,7 @@ The application can also be served by another local static development server, p
 ### Desktop
 
 - **Drag** the specimen to rotate.
-- **Mouse wheel** to zoom.
+- **Mouse wheel** over the viewer to move through research views; **Ctrl/Cmd + wheel** to zoom.
 - **Left / right arrows** or specimen cards to change insects.
 - **Research View** button to cycle through views 01–04.
 - **Click the specimen** to inspect anatomy.
@@ -141,7 +139,7 @@ The project is designed to keep the experience responsive despite the use of 3D 
 - GLB files are served locally.
 - The server supports HTTP byte ranges for model delivery.
 - Static visual assets use long-lived caching.
-- The carousel uses lightweight image cards rather than eight simultaneous 3D renderers.
+- The carousel uses lightweight image cards rather than seven simultaneous 3D renderers.
 - Mobile rendering can use a reduced device-pixel ratio to limit GPU workload.
 
 Actual loading and frame rate depend on the user's device, network, browser, and WebGL implementation.

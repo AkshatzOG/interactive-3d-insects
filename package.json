@@ -1,7 +1,1 @@
-{
-  "name":"insecta-genesis-lab",
-  "private":true,
-  "version":"15.3.0",
-  "scripts":{"start":"node server.js"},
-  "engines":{"node":">=18"}
-}
+{"name":"insecta-genesis-lab","private":true,"version":"15.4.0","scripts":{"start":"node server.js"},"engines":{"node":">=18"}}
